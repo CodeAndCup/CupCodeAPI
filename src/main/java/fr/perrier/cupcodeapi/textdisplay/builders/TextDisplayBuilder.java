@@ -358,9 +358,14 @@ public class TextDisplayBuilder {
      */
     private void createInteractionButtons(TextDisplayInstance instance, TextDisplay parentDisplay) {
         buttonConfigs.forEach((id, config) -> {
+            double yawRad = Math.toRadians(rotation.getX());
+
+            double relativeX = config.x * Math.cos(yawRad) - 0.05 * Math.sin(yawRad);
+            double relativeZ = config.x * Math.sin(yawRad) + 0.05 * Math.cos(yawRad);
+
             InteractionButton button = new InteractionButton(
                     id,
-                    new Vector3f(config.x, config.y, 0),
+                    new Vector3f((float) relativeX, config.y, (float) relativeZ),
                     new Vector3f(config.width, config.height, 0.1f),
                     parentDisplay,
                     world,
@@ -376,8 +381,16 @@ public class TextDisplayBuilder {
      * @param instance The TextDisplayInstance to add hoverable buttons to.
      */
     private void createHoverableButtons(TextDisplayInstance instance) {
+
+
         hoverButtonConfigs.forEach(config -> {
-            Location buttonLocation = location.clone().add(config.x, config.y, 0);
+
+            double yawRad = Math.toRadians(rotation.getX());
+
+            double relativeX = config.x * Math.cos(yawRad) - 0.05 * Math.sin(yawRad);
+            double relativeZ = config.x * Math.sin(yawRad) + 0.05 * Math.cos(yawRad);
+
+            Location buttonLocation = location.clone().add(relativeX, config.y, relativeZ);
 
             HoverableTextDisplay hoverButton = new HoverableTextDisplayBuilder(buttonLocation, targetPlayer)
                     .setText(config.text)

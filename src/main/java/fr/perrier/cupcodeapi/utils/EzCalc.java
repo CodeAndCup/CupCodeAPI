@@ -27,4 +27,13 @@ public class EzCalc {
 
         return new Location(loc.getWorld(), x, y, z, loc.getYaw(), loc.getPitch());
     }
+
+
+    public static Location getLocationBetween(Location loc1, Location loc2) {
+        double x = (loc1.getX() + loc2.getX()) / 2;
+        double y = (loc1.getY() + loc2.getY()) / 2;
+        double z = (loc1.getZ() + loc2.getZ()) / 2;
+
+        return new Location(loc1.getWorld(), x, y, z);
+    }
 }
