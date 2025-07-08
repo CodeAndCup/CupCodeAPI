@@ -2,7 +2,6 @@ package fr.perrier.cupcodeapi.commands;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import fr.perrier.cupcodeapi.*;
 import fr.perrier.cupcodeapi.commands.annotations.*;
 import fr.perrier.cupcodeapi.commands.annotations.defaults.*;
 import fr.perrier.cupcodeapi.utils.*;
@@ -13,28 +12,18 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.craftbukkit.v1_21_R2.CraftServer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
-// Add these imports for dynamic command registration
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -475,11 +464,20 @@ public class CommandHandler implements Listener {
     }
     */
 
-    @SneakyThrows
+    // Erreur sous paper
+    /*@SneakyThrows
     public static SimpleCommandMap getCommandMap() {
         final Class<?> craftServerClass = Reflection.getOBCClass("CraftServer");
         assert craftServerClass != null;
         final Method getCommandMapMethod = craftServerClass.getMethod("getCommandMap");
         return (SimpleCommandMap) getCommandMapMethod.invoke(craftServerClass.cast(Bukkit.getServer()), new Object[0]);
+    }*/
+
+    @SneakyThrows
+    public static SimpleCommandMap getCommandMap() {
+        Object server = Bukkit.getServer();
+        Field commandMapField = server.getClass().getDeclaredField("commandMap");
+        commandMapField.setAccessible(true);
+        return (SimpleCommandMap) commandMapField.get(server);
     }
 }

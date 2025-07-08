@@ -3,6 +3,7 @@ package fr.perrier.cupcodeapi;
 import fr.perrier.cupcodeapi.textdisplay.TextDisplayInstance;
 import fr.perrier.cupcodeapi.textdisplay.TextDisplayManager;
 import fr.perrier.cupcodeapi.textdisplay.events.TextDisplayClickListener;
+import fr.perrier.cupcodeapi.utils.item.CustomItemListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CupCodeAPI {
@@ -13,6 +14,7 @@ public class CupCodeAPI {
             pluginInstance = plugin;
         }
         pluginInstance.getServer().getPluginManager().registerEvents(new TextDisplayClickListener(), pluginInstance);
+        pluginInstance.getServer().getPluginManager().registerEvents(new CustomItemListener(), pluginInstance);
         TextDisplayInstance.registerGlobalListener();
     }
 

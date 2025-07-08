@@ -30,6 +30,7 @@ public class TextDisplayInstance {
     private final int expirationTime;
     private final Map<String, InteractionButton> buttons;
     private final Set<HoverableTextDisplay> hoverableButtons;
+    private final Set<TextDisplay> displayButtons;
     private final Map<String, Consumer<TextDisplayClickEvent>> clickHandlers = new HashMap<>();
 
     // Propriétés pour le hover (null si pas hoverable)
@@ -71,6 +72,7 @@ public class TextDisplayInstance {
         this.hoverBehavior = hoverBehavior;
         this.buttons = new HashMap<>();
         this.hoverableButtons = new HashSet<>();
+        this.displayButtons = new HashSet<>();
         
         instances.add(this);
     }
@@ -116,6 +118,15 @@ public class TextDisplayInstance {
     }
 
     /**
+     * Add a display button to this display.
+     *
+     * @param button The display button.
+     */
+    public void addDisplayButton(TextDisplay button) {
+        displayButtons.add(button);
+    }
+
+    /**
      * Get a button by its ID.
      *
      * @param buttonId The button ID.
@@ -134,6 +145,7 @@ public class TextDisplayInstance {
         // Supprimer tous les boutons
         buttons.values().forEach(InteractionButton::remove);
         hoverableButtons.forEach(HoverableTextDisplay::destroy);
+        displayButtons.forEach(TextDisplay::remove);
 
         // Supprimer le TextDisplay
         if (textDisplay != null && !textDisplay.isDead()) {
@@ -248,7 +260,7 @@ public class TextDisplayInstance {
 
     private static TextDisplay findNearbyTextDisplay(Interaction interaction) {
         return interaction.getLocation().getWorld()
-                .getNearbyEntities(interaction.getLocation(), 2, 2, 2)
+                .getNearbyEntities(interaction.getLocation(), 5, 5, 5)
                 .stream()
                 .filter(entity -> entity instanceof TextDisplay)
                 .map(entity -> (TextDisplay) entity)

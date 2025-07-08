@@ -36,4 +36,36 @@ public class EzCalc {
 
         return new Location(loc1.getWorld(), x, y, z);
     }
+
+    /**
+     * Calcule l'angle en degrés entre deux vecteurs J1 et J2 par rapport au point pivot (centre).
+     * L'angle est mesuré dans le plan X-Z (horizontal), comme un yaw.
+     *
+     * Cette méthode est valide : elle utilise le produit scalaire pour l'angle et le produit vectoriel pour le signe,
+     * ce qui correspond à la convention du yaw dans Minecraft (plan XZ).
+     */
+    public static float getYawAngleBetween(Location pivot, Location j1, Location j2) {
+        double dx1 = j1.getX() - pivot.getX();
+        double dz1 = j1.getZ() - pivot.getZ();
+
+        double dx2 = j2.getX() - pivot.getX();
+        double dz2 = j2.getZ() - pivot.getZ();
+
+        double dot = dx1 * dx2 + dz1 * dz2;
+        double mag1 = Math.sqrt(dx1 * dx1 + dz1 * dz1);
+        double mag2 = Math.sqrt(dx2 * dx2 + dz2 * dz2);
+
+        if (mag1 == 0 || mag2 == 0) return 0;
+
+        double cos = dot / (mag1 * mag2);
+        cos = Math.max(-1.0, Math.min(1.0, cos));
+
+        double angleRad = Math.acos(cos);
+        double angleDeg = Math.toDegrees(angleRad);
+
+        double cross = dx1 * dz2 - dz1 * dx2;
+        if (cross < 0) angleDeg = -angleDeg;
+
+        return (float) angleDeg;
+    }
 }

@@ -7,6 +7,7 @@ import fr.perrier.cupcodeapi.textdisplay.hover.HoverBehavior;
 import fr.perrier.cupcodeapi.textdisplay.hover.HoverableTextDisplay;
 import fr.perrier.cupcodeapi.utils.ChatUtil;
 import lombok.Getter;
+import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -27,7 +28,7 @@ import java.util.*;
 @Getter
 public class TextDisplayBuilder {
     protected final World world;
-    protected final Location location;
+    protected Location location;
     protected final Player targetPlayer;
 
     // Propriétés du TextDisplay
@@ -47,6 +48,7 @@ public class TextDisplayBuilder {
     // Boutons
     private final Map<String, ButtonConfiguration> buttonConfigs = new HashMap<>();
     private final List<HoverButtonConfiguration> hoverButtonConfigs = new ArrayList<>();
+    private final List<TextDisplayButtonConfiguration> displayButtonConfigs = new ArrayList<>();
 
     /**
      * Create a builder for a TextDisplay at the given location.
@@ -67,6 +69,18 @@ public class TextDisplayBuilder {
         this.location = location.clone();
         this.world = location.getWorld();
         this.targetPlayer = targetPlayer;
+    }
+
+
+    /**
+     * Set the text display location
+     *
+     * @param location The location of the text displa
+     * @return
+     */
+    public TextDisplayBuilder setLocation(Location location) {
+        this.location = location;
+        return this;
     }
 
     // Méthodes de configuration fluides
@@ -266,6 +280,23 @@ public class TextDisplayBuilder {
         hoverButtonConfigs.add(new HoverButtonConfiguration(
                 id, text, hoverText, hoverBackgroundColor, scale, hoverScale, x, y, width, height
         ));
+
+        return this;
+    }
+
+    /**
+     *
+     * @param text The text of the display
+     * @param backgroundColor The background color of the display
+     * @param x The X position
+     * @param y The Y positon
+     * @param scale The scale of the display
+     * @param shadowed The shadow
+     *
+     * @return This builder.
+     */
+    public TextDisplayBuilder addDisplayButton(String text, Color backgroundColor, float x, float y, float scale, boolean shadowed, TextDisplay.TextAlignment alignment) {
+        displayButtonConfigs.add(new TextDisplayButtonConfiguration(text,backgroundColor,x,y,scale,shadowed,alignment));
         return this;
     }
 
@@ -306,6 +337,9 @@ public class TextDisplayBuilder {
 
         // Créer les boutons survolables
         createHoverableButtons(instance);
+
+        // Créer les boutons d'affichage
+        createDisplayButtons(instance);
 
         // Enregistrer dans le manager
         TextDisplayManager.getInstance().registerDisplay(instance);
@@ -406,6 +440,29 @@ public class TextDisplayBuilder {
         });
     }
 
+    private void createDisplayButtons(TextDisplayInstance instance) {
+        displayButtonConfigs.forEach(config -> {
+            double yawRad = Math.toRadians(rotation.getX());
+
+            double relativeX = config.x * Math.cos(yawRad) - 0.05 * Math.sin(yawRad);
+            double relativeZ = config.x * Math.sin(yawRad) + 0.05 * Math.cos(yawRad);
+
+            Location buttonLocation = location.clone().add(relativeX, config.y, relativeZ);
+
+            TextDisplay displayButton = new TextDisplayBuilder(buttonLocation, targetPlayer)
+                    .setText(config.text)
+                    .setBackgroundColor(config.background)
+                    .setRotation((float) rotation.getX(), (float) rotation.getY())
+                    .setShadowed(config.shadow)
+                    .setAlignment(config.alignment)
+                    .setBillboard(billboard)
+                    .setScale(config.scale)
+                    .createTextDisplay();
+
+            instance.addDisplayButton(displayButton);
+        });
+    }
+
     // Classes de configuration interne
     /**
      * Configuration for a standard interaction button.
@@ -466,6 +523,26 @@ public class TextDisplayBuilder {
             this.y = y;
             this.width = width;
             this.height = height;
+        }
+    }
+
+    @Getter
+    protected static class TextDisplayButtonConfiguration {
+        final String text;
+        final Color background;
+        final float x, y, scale;
+        final boolean shadow;
+        final TextDisplay.TextAlignment alignment;
+
+        TextDisplayButtonConfiguration(String text, Color background,
+                                       float x, float y, float scale, boolean shadow, TextDisplay.TextAlignment alignment) {
+            this.text = text;
+            this.background = background;
+            this.x = x;
+            this.y = y;
+            this.scale = scale;
+            this.shadow = shadow;
+            this.alignment = alignment;
         }
     }
 }

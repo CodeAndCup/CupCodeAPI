@@ -57,7 +57,7 @@ public class TextDisplayClickListener implements Listener {
 
     private TextDisplay findNearbyTextDisplay(Interaction interaction) {
         return interaction.getLocation().getWorld()
-                .getNearbyEntities(interaction.getLocation(), 2, 2, 2)
+                .getNearbyEntities(interaction.getLocation(), 5, 5, 5)
                 .stream()
                 .filter(entity -> entity instanceof TextDisplay)
                 .map(entity -> (TextDisplay) entity)

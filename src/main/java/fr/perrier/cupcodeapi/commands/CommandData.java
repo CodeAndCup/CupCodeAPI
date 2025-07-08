@@ -1,6 +1,5 @@
 package fr.perrier.cupcodeapi.commands;
 
-import fr.perrier.cupcodeapi.*;
 import fr.perrier.cupcodeapi.commands.annotations.*;
 import fr.perrier.cupcodeapi.commands.annotations.Command;
 import fr.perrier.cupcodeapi.utils.*;
