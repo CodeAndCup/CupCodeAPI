@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 public class CloseButton extends Button {
     @Override
     public ItemStack getButtonItem(final Player player) {
-        final ItemBuilder item = new ItemBuilder(XMaterial.INK_SAC.parseMaterial()).setDurability(1).setName(ChatColor.translateAlternateColorCodes('&', "&cClose"));
+        final ItemBuilder item = new ItemBuilder(XMaterial.INK_SAC.parseMaterial()).setDurability(1).setName(ChatUtil.translate( "&cClose"));
         return item.toItemStack();
     }
 

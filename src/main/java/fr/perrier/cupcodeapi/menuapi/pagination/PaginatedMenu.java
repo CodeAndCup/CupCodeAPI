@@ -3,6 +3,7 @@ package fr.perrier.cupcodeapi.menuapi.pagination;
 
 import fr.perrier.cupcodeapi.menuapi.*;
 import fr.perrier.cupcodeapi.menuapi.buttons.*;
+import fr.perrier.cupcodeapi.utils.ChatUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +26,7 @@ public abstract class PaginatedMenu extends Menu {
 
     @Override
     public String getTitle(final Player player) {
-        return ChatColor.translateAlternateColorCodes('&', this.getPrePaginatedTitle(player) + " &8(&7" + this.page + "/" + this.getPages(player) + "&8)");
+        return ChatUtil.translate( this.getPrePaginatedTitle(player) + " &8(&7" + this.page + "/" + this.getPages(player) + "&8)");
     }
 
     public final void modPage(final Player player, final int mod) {

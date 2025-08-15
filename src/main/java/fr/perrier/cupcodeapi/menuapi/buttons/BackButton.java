@@ -18,7 +18,7 @@ public class BackButton extends Button {
 
     @Override
     public ItemStack getButtonItem(final Player player) {
-        final ItemBuilder item = new ItemBuilder(Material.ARROW).setName(ChatColor.translateAlternateColorCodes('&', "&f&l« &c&lBack"));
+        final ItemBuilder item = new ItemBuilder(Material.ARROW).setName(ChatUtil.translate("&f&l« &c&lBack"));
         return item.toItemStack();
     }
 

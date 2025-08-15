@@ -24,7 +24,7 @@ public class JumpToPageButton extends Button {
     @Override
     public ItemStack getButtonItem(final Player player) {
         final ItemBuilder item = new ItemBuilder(this.current ? XMaterial.MAP.parseMaterial() : Material.PAPER, this.page);
-        item.setName(ChatColor.translateAlternateColorCodes('&', "&7Page " + this.page));
+        item.setName(ChatUtil.translate( "&7Page " + this.page));
         if (this.current) {
             item.setLore("&7Current Page");
         }

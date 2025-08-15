@@ -2,6 +2,7 @@ package fr.perrier.cupcodeapi.menuapi;
 
 import com.cryptomorin.xseries.XMaterial;
 import fr.perrier.cupcodeapi.CupCodeAPI;
+import fr.perrier.cupcodeapi.utils.ChatUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -107,7 +108,7 @@ public abstract class Menu {
                 }
             }
         if (this.inventory == null)
-            this.inventory = Bukkit.createInventory(player, size, ChatColor.translateAlternateColorCodes('&', title));
+            this.inventory = Bukkit.createInventory(player, size, ChatUtil.translate(title));
         this.inventory.setContents(new ItemStack[this.inventory.getSize()]);
         currentlyOpenedMenus.put(player.getName(), this);
         for (Map.Entry<Integer, Button> buttonEntry : this.buttons.entrySet())
