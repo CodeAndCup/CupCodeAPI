@@ -3,7 +3,7 @@ package fr.perrier.cupcodeapi.textdisplay;
 import fr.perrier.cupcodeapi.CupCodeAPI;
 import fr.perrier.cupcodeapi.textdisplay.events.TextDisplayClickEvent;
 import fr.perrier.cupcodeapi.textdisplay.hover.HoverBehavior;
-import fr.perrier.cupcodeapi.textdisplay.hover.HoverableTextDisplay;
+import fr.perrier.cupcodeapi.textdisplay.hover.ButtonTextDisplay;
 import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -12,9 +12,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -28,9 +31,12 @@ public class TextDisplayInstance {
     private final Player targetPlayer;
     private final Location location;
     private final int expirationTime;
-    private final Map<String, InteractionButton> buttons;
-    private final Set<HoverableTextDisplay> hoverableButtons;
+
+    private final Map<UUID,String> buttonNames;
+    private final Set<ButtonTextDisplay> buttons;
+
     private final Set<TextDisplay> displayButtons;
+
     private final Map<String, Consumer<TextDisplayClickEvent>> clickHandlers = new HashMap<>();
 
     // Propriétés pour le hover (null si pas hoverable)
@@ -70,8 +76,8 @@ public class TextDisplayInstance {
         this.location = location;
         this.expirationTime = expirationTime;
         this.hoverBehavior = hoverBehavior;
-        this.buttons = new HashMap<>();
-        this.hoverableButtons = new HashSet<>();
+        this.buttonNames = new HashMap<>();
+        this.buttons = new HashSet<>();
         this.displayButtons = new HashSet<>();
         
         instances.add(this);
@@ -95,7 +101,7 @@ public class TextDisplayInstance {
         }
 
         // Mettre à jour aussi les boutons survolables
-        hoverableButtons.forEach(HoverableTextDisplay::updateHoverState);
+        buttons.forEach(ButtonTextDisplay::updateHoverState);
     }
 
     /**
@@ -104,17 +110,9 @@ public class TextDisplayInstance {
      * @param buttonId The button ID.
      * @param button The button instance.
      */
-    public void addButton(String buttonId, InteractionButton button) {
-        buttons.put(buttonId, button);
-    }
-
-    /**
-     * Add a hoverable button to this display.
-     *
-     * @param button The hoverable button.
-     */
-    public void addHoverableButton(HoverableTextDisplay button) {
-        hoverableButtons.add(button);
+    public void addButton(String buttonId, ButtonTextDisplay button) {
+        buttonNames.put(button.getId(), buttonId);
+        buttons.add(button);
     }
 
     /**
@@ -132,8 +130,8 @@ public class TextDisplayInstance {
      * @param buttonId The button ID.
      * @return An Optional containing the button if found.
      */
-    public Optional<InteractionButton> getButton(String buttonId) {
-        return Optional.ofNullable(buttons.get(buttonId));
+    public Optional<ButtonTextDisplay> getButton(String buttonId) {
+        return Optional.ofNullable(buttons.stream().filter(button -> buttonNames.get(button.getId()).equals(buttonId)).findFirst().orElse(null));
     }
 
     /**
@@ -143,8 +141,7 @@ public class TextDisplayInstance {
         instances.remove(this);
 
         // Supprimer tous les boutons
-        buttons.values().forEach(InteractionButton::remove);
-        hoverableButtons.forEach(HoverableTextDisplay::destroy);
+        buttons.forEach(ButtonTextDisplay::destroy);
         displayButtons.forEach(TextDisplay::remove);
 
         // Supprimer le TextDisplay
@@ -183,7 +180,7 @@ public class TextDisplayInstance {
      * @return This TextDisplayInstance for chaining.
      */
     public TextDisplayInstance onClick(String buttonId, Consumer<TextDisplayClickEvent> clickHandler) {
-        if (buttons.containsKey(buttonId)) {
+        if (buttonNames.containsValue(buttonId)) {
             clickHandlers.put(buttonId, clickHandler);
         } else {
             throw new IllegalArgumentException("No button found with ID: " + buttonId);
@@ -203,53 +200,32 @@ public class TextDisplayInstance {
         }
     }
 
-    private Optional<Boolean> handleInteraction(TextDisplayClickEvent event, Interaction interaction) {
-        return buttons.values().stream()
-                .filter(button -> button.getInteraction().equals(interaction))
-                .findFirst()
-                .map(button -> {
-                    if (button.isTargetedFor(event.getPlayer())) {
-                        handleClick(event, button.getId());
-                        return true;
-                    }
-                    return false;
-                });
-    }
-
     /**
      * Register the click listener for this display.
      */
     public static void registerGlobalListener() {
+
         Bukkit.getPluginManager().registerEvents(new Listener() {
             @EventHandler
-            public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
-                if (!(event.getRightClicked() instanceof Interaction interaction)) return;
-
-                String buttonId = getMetadata(interaction, "BUTTON_ID");
-                String targetPlayer = getMetadata(interaction, "TARGET_PLAYER");
-
-                if (buttonId == null) return;
-
-                if (!"ALL".equals(targetPlayer) && !event.getPlayer().getUniqueId().toString().equals(targetPlayer)) {
-                    return;
+            public void onPlayerInput(PlayerInteractEvent event) {
+                Player player = event.getPlayer();
+                if(event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK ) {
+                    if(ButtonTextDisplay.getHoveredDisplays().containsKey(player.getUniqueId())) {
+                        ButtonTextDisplay hoveredDisplay = ButtonTextDisplay.getHoveredDisplays().get(player.getUniqueId());
+                        TextDisplayManager.getInstance().getInstanceOfButton(hoveredDisplay.getId())
+                                .ifPresent(displayInstance -> {
+                                    String buttonId = displayInstance.getButtonNames().get(hoveredDisplay.getId());
+                                    TextDisplayClickEvent clickEvent = new TextDisplayClickEvent(
+                                            player,
+                                            displayInstance,
+                                            buttonId
+                                    );
+                                    displayInstance.handleClick(clickEvent, buttonId);
+                                });
+                    }
                 }
-
-                TextDisplay parentDisplay = findNearbyTextDisplay(interaction);
-                if (parentDisplay == null) return;
-
-                TextDisplayManager.getInstance().getDisplayByEntity(parentDisplay)
-                        .ifPresent(displayInstance -> {
-                            TextDisplayClickEvent clickEvent = new TextDisplayClickEvent(
-                                    event.getPlayer(),
-                                    displayInstance,
-                                    buttonId
-                            );
-                            displayInstance.handleInteraction(clickEvent,interaction)
-                                    .ifPresent(clicked -> event.setCancelled(true));
-                        });
-                }
-            }, CupCodeAPI.getPlugin()
-        );
+            }
+        }, CupCodeAPI.getPlugin());
     }
 
     private static String getMetadata(Interaction interaction, String key) {
@@ -258,9 +234,9 @@ public class TextDisplayInstance {
                 : null;
     }
 
-    private static TextDisplay findNearbyTextDisplay(Interaction interaction) {
-        return interaction.getLocation().getWorld()
-                .getNearbyEntities(interaction.getLocation(), 5, 5, 5)
+    private static TextDisplay findNearbyTextDisplay(TextDisplay textDisplay) {
+        return textDisplay.getLocation().getWorld()
+                .getNearbyEntities(textDisplay.getLocation(), 5, 5, 5)
                 .stream()
                 .filter(entity -> entity instanceof TextDisplay)
                 .map(entity -> (TextDisplay) entity)

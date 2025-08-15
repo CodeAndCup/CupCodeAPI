@@ -77,7 +77,11 @@ public class ConfirmationMenu extends Menu {
 
         @Override
         public void clicked(Player player, int slot, ClickType clickType, int hotbarButton) {
-            oldMenu.openMenu(player);
+            if(oldMenu == null) {
+                player.closeInventory();
+            } else {
+                oldMenu.openMenu(player);
+            }
         }
     }
 

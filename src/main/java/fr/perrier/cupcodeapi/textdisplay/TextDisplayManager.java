@@ -94,6 +94,18 @@ public class TextDisplayManager {
     }
 
     /**
+     * Get a display instance by its button ID.
+     *
+     * @param buttonId The button ID.
+     * @return An Optional containing the display instance if found.
+     */
+    public Optional<TextDisplayInstance> getInstanceOfButton(UUID buttonId) {
+        return displays.values().stream()
+                .filter(display -> display.getButtonNames().containsKey(buttonId))
+                .findFirst();
+    }
+
+    /**
      * Get all display instances associated with a player.
      *
      * @param player The player.

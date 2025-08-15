@@ -1,9 +1,8 @@
 package fr.perrier.cupcodeapi.textdisplay.builders;
 
 import fr.perrier.cupcodeapi.textdisplay.TextDisplayInstance;
-import fr.perrier.cupcodeapi.textdisplay.hover.HoverableTextDisplay;
+import fr.perrier.cupcodeapi.textdisplay.hover.ButtonTextDisplay;
 import fr.perrier.cupcodeapi.utils.ChatUtil;
-import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
@@ -12,22 +11,20 @@ import org.bukkit.entity.TextDisplay;
 
 import java.util.UUID;
 
-/**
- * Specialized builder for hoverable TextDisplays.
- */
-@Getter
-public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
+public class ButtonTextDisplayBuilder extends TextDisplayBuilder {
     private String hoveredText;
     private Color hoveredColor;
     private float hoverScale = 1.3f;
     private double detectionRange = 5.0;
+    private float displayWidth;
+    private float displayHeight;
 
     /**
      * Create a builder for a hoverable TextDisplay at the given location.
      *
      * @param location The location.
      */
-    public HoverableTextDisplayBuilder(Location location) {
+    public ButtonTextDisplayBuilder(Location location) {
         super(location);
     }
 
@@ -37,7 +34,7 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      * @param location The location.
      * @param targetPlayer The target player.
      */
-    public HoverableTextDisplayBuilder(Location location, Player targetPlayer) {
+    public ButtonTextDisplayBuilder(Location location, Player targetPlayer) {
         super(location, targetPlayer);
     }
 
@@ -47,7 +44,7 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      * @param text The hovered text lines.
      * @return This builder.
      */
-    public HoverableTextDisplayBuilder setHoveredText(String... text) {
+    public ButtonTextDisplayBuilder setHoveredText(String... text) {
         this.hoveredText = ChatUtil.translate(String.join("\n", text));
         return this;
     }
@@ -58,7 +55,7 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      * @param hoveredText The hovered text.
      * @return This builder.
      */
-    public HoverableTextDisplayBuilder setHoveredText(String hoveredText) {
+    public ButtonTextDisplayBuilder setHoveredText(String hoveredText) {
         this.hoveredText = ChatUtil.translate(hoveredText);
         return this;
     }
@@ -69,7 +66,7 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      * @param hoveredColor The hovered background color.
      * @return This builder.
      */
-    public HoverableTextDisplayBuilder setHoveredBackgroundColor(Color hoveredColor) {
+    public ButtonTextDisplayBuilder setHoveredBackgroundColor(Color hoveredColor) {
         this.hoveredColor = hoveredColor;
         return this;
     }
@@ -80,7 +77,7 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      * @param hoverScale The hover scale.
      * @return This builder.
      */
-    public HoverableTextDisplayBuilder setHoverScale(float hoverScale) {
+    public ButtonTextDisplayBuilder setHoverScale(float hoverScale) {
         this.hoverScale = hoverScale;
         return this;
     }
@@ -91,80 +88,102 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      * @param detectionRange The detection range.
      * @return This builder.
      */
-    public HoverableTextDisplayBuilder setDetectionRange(double detectionRange) {
+    public ButtonTextDisplayBuilder setDetectionRange(double detectionRange) {
         this.detectionRange = detectionRange;
+        return this;
+    }
+
+    /**
+     * Set the width of the TextDisplay.
+     *
+     * @param displayWidth The width
+     * @return This builder
+     */
+    public ButtonTextDisplayBuilder setDisplayWidth(float displayWidth) {
+        this.displayWidth = displayWidth;
+        return this;
+    }
+
+    /**
+     * Set the height of the TextDisplay.
+     *
+     * @param displayHeight The height
+     * @return This builder
+     */
+    public ButtonTextDisplayBuilder setDisplayHeight(float displayHeight) {
+        this.displayHeight = displayHeight;
         return this;
     }
 
     // Override des méthodes pour maintenir le type de retour
     @Override
-    public HoverableTextDisplayBuilder setText(String... text) {
+    public ButtonTextDisplayBuilder setText(String... text) {
         super.setText(text);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setText(String text) {
+    public ButtonTextDisplayBuilder setText(String text) {
         super.setText(text);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setBillboard(Display.Billboard billboard) {
+    public ButtonTextDisplayBuilder setBillboard(Display.Billboard billboard) {
         super.setBillboard(billboard);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setScale(float scale) {
+    public ButtonTextDisplayBuilder setScale(float scale) {
         super.setScale(scale);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setAlignment(TextDisplay.TextAlignment alignment) {
+    public ButtonTextDisplayBuilder setAlignment(TextDisplay.TextAlignment alignment) {
         super.setAlignment(alignment);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setShadowed(boolean shadowed) {
+    public ButtonTextDisplayBuilder setShadowed(boolean shadowed) {
         super.setShadowed(shadowed);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setSeeThrough(boolean seeThrough) {
+    public ButtonTextDisplayBuilder setSeeThrough(boolean seeThrough) {
         super.setSeeThrough(seeThrough);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setViewRange(double viewRange) {
+    public ButtonTextDisplayBuilder setViewRange(double viewRange) {
         super.setViewRange(viewRange);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setVisible(boolean visible) {
+    public ButtonTextDisplayBuilder setVisible(boolean visible) {
         super.setVisible(visible);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setBrightness(int brightness) {
+    public ButtonTextDisplayBuilder setBrightness(int brightness) {
         super.setBrightness(brightness);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setRotation(float yaw, float pitch) {
+    public ButtonTextDisplayBuilder setRotation(float yaw, float pitch) {
         super.setRotation(yaw, pitch);
         return this;
     }
 
     @Override
-    public HoverableTextDisplayBuilder setBackgroundColor(Color backgroundColor) {
+    public ButtonTextDisplayBuilder setBackgroundColor(Color backgroundColor) {
         super.setBackgroundColor(backgroundColor);
         return this;
     }
@@ -174,10 +193,10 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
      *
      * @return The created HoverableTextDisplay.
      */
-    public HoverableTextDisplay buildHoverable() {
+    public ButtonTextDisplay buildHoverable() {
         TextDisplay display = createTextDisplay();
 
-        return new HoverableTextDisplay(
+        return new ButtonTextDisplay(
                 UUID.randomUUID(),
                 display,
                 targetPlayer,
@@ -188,7 +207,9 @@ public class HoverableTextDisplayBuilder extends TextDisplayBuilder {
                 hoveredColor,
                 scale,
                 hoverScale,
-                detectionRange
+                detectionRange,
+                displayWidth,
+                displayHeight
         );
     }
 

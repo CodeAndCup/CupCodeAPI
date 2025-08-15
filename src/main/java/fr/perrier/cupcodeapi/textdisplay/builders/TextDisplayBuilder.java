@@ -1,13 +1,11 @@
 package fr.perrier.cupcodeapi.textdisplay.builders;
 
-import fr.perrier.cupcodeapi.textdisplay.InteractionButton;
 import fr.perrier.cupcodeapi.textdisplay.TextDisplayInstance;
 import fr.perrier.cupcodeapi.textdisplay.TextDisplayManager;
 import fr.perrier.cupcodeapi.textdisplay.hover.HoverBehavior;
-import fr.perrier.cupcodeapi.textdisplay.hover.HoverableTextDisplay;
+import fr.perrier.cupcodeapi.textdisplay.hover.ButtonTextDisplay;
 import fr.perrier.cupcodeapi.utils.ChatUtil;
 import lombok.Getter;
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -47,7 +45,6 @@ public class TextDisplayBuilder {
 
     // Boutons
     private final Map<String, ButtonConfiguration> buttonConfigs = new HashMap<>();
-    private final List<HoverButtonConfiguration> hoverButtonConfigs = new ArrayList<>();
     private final List<TextDisplayButtonConfiguration> displayButtonConfigs = new ArrayList<>();
 
     /**
@@ -228,59 +225,21 @@ public class TextDisplayBuilder {
         return this;
     }
 
-    // Méthodes pour les boutons
-    /**
-     * Add an interaction button.
-     *
-     * @param id The button ID.
-     * @param x The X position.
-     * @param y The Y position.
-     * @param width The width.
-     * @param height The height.
-     * @return This builder.
-     */
-    public TextDisplayBuilder addButton(String id, float x, float y, float width, float height) {
-        buttonConfigs.put(id, new ButtonConfiguration(x, y, width, height));
-        return this;
-    }
 
     /**
-     * Add a hoverable button.
-     *
-     * @param id The button ID.
-     * @param text The button text.
-     * @param hoverText The text when hovered.
-     * @param x The X position.
-     * @param y The Y position.
-     * @param width The width.
-     * @param height The height.
-     * @return This builder.
+     * Add a button.
      */
-    public TextDisplayBuilder addHoverButton(String id, String text, String hoverText,
-                                             float x, float y, float width, float height) {
-        return addHoverButton(id, text, hoverText, null, 1.0f, 1.3f, x, y, width, height);
-    }
-
-    public TextDisplayBuilder addHoverButton(String id, String text, String hoverText,
-                                             Color hoverBackgroundColor, float x, float y,
-                                             float width, float height) {
-        return addHoverButton(id, text, hoverText, hoverBackgroundColor, 1.0f, 1.3f, x, y, width, height);
-    }
-
-    public TextDisplayBuilder addHoverButton(String id, String text, String hoverText,
-                                             Color hoverBackgroundColor, float scale,
-                                             float x, float y, float width, float height) {
-        return addHoverButton(id, text, hoverText, hoverBackgroundColor, scale, 1.3f, x, y, width, height);
-    }
-
-    public TextDisplayBuilder addHoverButton(String id, String text, String hoverText,
-                                             Color hoverBackgroundColor, float scale, float hoverScale,
-                                             float x, float y, float width, float height) {
-        buttonConfigs.put(id, new ButtonConfiguration(x,y,width,height));
-        hoverButtonConfigs.add(new HoverButtonConfiguration(
-                id, text, hoverText, hoverBackgroundColor, scale, hoverScale, x, y, width, height
-        ));
-
+    public TextDisplayBuilder addButton(String id, String text, String hoverText,
+                                                     Color hoverBackgroundColor,
+                                                     float scale, float hoverScale,
+                                                     float x, float y, float detectionRange,
+                                                     float width, float height) {
+        buttonConfigs.put(id, new ButtonConfiguration(
+                id, text, hoverText,
+                hoverBackgroundColor,
+                scale, hoverScale,
+                x, y, detectionRange,
+                width, height));
         return this;
     }
 
@@ -309,36 +268,16 @@ public class TextDisplayBuilder {
         // Créer le TextDisplay principal
         TextDisplay display = createTextDisplay();
 
-        // Créer le comportement de survol si nécessaire
-        HoverBehavior hoverBehavior = null;
-        if (this instanceof HoverableTextDisplayBuilder) {
-            HoverableTextDisplayBuilder hoverBuilder = (HoverableTextDisplayBuilder) this;
-            hoverBehavior = new HoverBehavior(
-                    display,
-                    targetPlayer,
-                    text,
-                    hoverBuilder.getHoveredText(),
-                    backgroundColor,
-                    hoverBuilder.getHoveredColor(),
-                    scale,
-                    hoverBuilder.getHoverScale(),
-                    hoverBuilder.getDetectionRange()
-            );
-        }
-
         // Créer l'instance
         UUID instanceId = UUID.randomUUID();
         TextDisplayInstance instance = new TextDisplayInstance(
-                instanceId, display, targetPlayer, location, expirationTime, hoverBehavior
+                instanceId, display, targetPlayer, location, expirationTime
         );
 
-        // Créer les boutons d'interaction
-        createInteractionButtons(instance, display);
+        // Créer les boutons
+        createButtons(instance);
 
-        // Créer les boutons survolables
-        createHoverableButtons(instance);
-
-        // Créer les boutons d'affichage
+        // Créer les affichages supplémentaires
         createDisplayButtons(instance);
 
         // Enregistrer dans le manager
@@ -384,41 +323,10 @@ public class TextDisplayBuilder {
         return display;
     }
 
-    /**
-     * Create and add interaction buttons to the given TextDisplayInstance.
-     *
-     * @param instance The TextDisplayInstance to add buttons to.
-     * @param parentDisplay The parent TextDisplay entity.
-     */
-    private void createInteractionButtons(TextDisplayInstance instance, TextDisplay parentDisplay) {
-        buttonConfigs.forEach((id, config) -> {
-            double yawRad = Math.toRadians(rotation.getX());
 
-            double relativeX = config.x * Math.cos(yawRad) - 0.05 * Math.sin(yawRad);
-            double relativeZ = config.x * Math.sin(yawRad) + 0.05 * Math.cos(yawRad);
+    private void createButtons(TextDisplayInstance instance) {
 
-            InteractionButton button = new InteractionButton(
-                    id,
-                    new Vector3f((float) relativeX, config.y, (float) relativeZ),
-                    new Vector3f(config.width, config.height, 0.1f),
-                    parentDisplay,
-                    world,
-                    targetPlayer
-            );
-            instance.addButton(id, button);
-        });
-    }
-
-    /**
-     * Create and add hoverable buttons to the given TextDisplayInstance.
-     *
-     * @param instance The TextDisplayInstance to add hoverable buttons to.
-     */
-    private void createHoverableButtons(TextDisplayInstance instance) {
-
-
-        hoverButtonConfigs.forEach(config -> {
-
+        buttonConfigs.forEach((id,config) -> {
             double yawRad = Math.toRadians(rotation.getX());
 
             double relativeX = config.x * Math.cos(yawRad) - 0.05 * Math.sin(yawRad);
@@ -426,7 +334,7 @@ public class TextDisplayBuilder {
 
             Location buttonLocation = location.clone().add(relativeX, config.y, relativeZ);
 
-            HoverableTextDisplay hoverButton = new HoverableTextDisplayBuilder(buttonLocation, targetPlayer)
+            ButtonTextDisplay hoverButton = new ButtonTextDisplayBuilder(buttonLocation, targetPlayer)
                     .setText(config.text)
                     .setHoveredText(config.hoverText)
                     .setScale(config.scale)
@@ -434,9 +342,12 @@ public class TextDisplayBuilder {
                     .setBackgroundColor(backgroundColor)
                     .setRotation((float) rotation.getX(), (float) rotation.getY())
                     .setHoveredBackgroundColor(config.hoverBackgroundColor)
+                    .setDetectionRange(config.detectionRange)
+                    .setDisplayWidth(config.width)
+                    .setDisplayHeight(config.height)
                     .buildHoverable();
 
-            instance.addHoverableButton(hoverButton);
+            instance.addButton(id,hoverButton);
         });
     }
 
@@ -464,67 +375,6 @@ public class TextDisplayBuilder {
     }
 
     // Classes de configuration interne
-    /**
-     * Configuration for a standard interaction button.
-     */
-    @Getter
-    protected static class ButtonConfiguration {
-        final float x, y, width, height;
-
-        /**
-         * Construct a ButtonConfiguration.
-         *
-         * @param x The X position.
-         * @param y The Y position.
-         * @param width The width.
-         * @param height The height.
-         */
-        ButtonConfiguration(float x, float y, float width, float height) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-    }
-
-    /**
-     * Configuration for a hoverable button.
-     */
-    @Getter
-    protected static class HoverButtonConfiguration {
-        final String id, text, hoverText;
-        final Color hoverBackgroundColor;
-        final float scale, hoverScale, x, y, width, height;
-
-        /**
-         * Construct a HoverButtonConfiguration.
-         *
-         * @param id The button ID.
-         * @param text The button text.
-         * @param hoverText The text when hovered.
-         * @param hoverBackgroundColor The background color when hovered.
-         * @param scale The normal scale.
-         * @param hoverScale The scale when hovered.
-         * @param x The X position.
-         * @param y The Y position.
-         * @param width The width.
-         * @param height The height.
-         */
-        HoverButtonConfiguration(String id, String text, String hoverText,
-                                 Color hoverBackgroundColor, float scale, float hoverScale,
-                                 float x, float y, float width, float height) {
-            this.id = id;
-            this.text = text;
-            this.hoverText = hoverText;
-            this.hoverBackgroundColor = hoverBackgroundColor;
-            this.scale = scale;
-            this.hoverScale = hoverScale;
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-    }
 
     @Getter
     protected static class TextDisplayButtonConfiguration {
@@ -543,6 +393,31 @@ public class TextDisplayBuilder {
             this.scale = scale;
             this.shadow = shadow;
             this.alignment = alignment;
+        }
+    }
+
+    @Getter
+    protected static class ButtonConfiguration {
+        final String id, text, hoverText;
+        final Color hoverBackgroundColor;
+        final float scale, hoverScale, detectionRange, x, y, width, height;
+
+        ButtonConfiguration(String id, String text, String hoverText,
+                                         Color hoverBackgroundColor,
+                                         float scale, float hoverScale,
+                                         float x, float y, float detectionRange,
+                                         float width, float height) {
+            this.id = id;
+            this.text = text;
+            this.hoverText = hoverText;
+            this.hoverBackgroundColor = hoverBackgroundColor;
+            this.scale = scale;
+            this.hoverScale = hoverScale;
+            this.x = x;
+            this.y = y;
+            this.detectionRange = detectionRange;
+            this.width = width;
+            this.height = height;
         }
     }
 }
