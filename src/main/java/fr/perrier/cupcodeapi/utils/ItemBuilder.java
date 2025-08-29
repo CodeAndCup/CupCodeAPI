@@ -94,7 +94,6 @@ public class ItemBuilder {
      *
      * @param hash the head hash (base64)
      */
-    //PS: A celui qui voit ce commentaire, j'ai voulu me suicidé pour fix ce bug (3h que je suis dessus), et Claude la fix en 15sec.
     public ItemBuilder setTexture(String hash) {
         if (!(this.is.getItemMeta() instanceof SkullMeta)) {
             return this;
@@ -179,6 +178,9 @@ public class ItemBuilder {
         return this;
     }
 
+    /**
+     * Hide all item flags (attributes, enchants, unbreakable, etc).
+     */
     public ItemBuilder hideItemFlags() {
         ItemMeta im = is.getItemMeta();
         for (ItemFlag value : ItemFlag.values()) {
@@ -188,6 +190,11 @@ public class ItemBuilder {
         return this;
     }
 
+    /**
+     * Set the amount of items of the ItemStack.
+     *
+     * @param amount The amount to set it to.
+     */
     public ItemBuilder setAmount(int amount) {
         is.setAmount(amount);
         return this;
@@ -406,7 +413,7 @@ public class ItemBuilder {
         return is;
     }
 
-    /*
+    /**
      * Converts the ItemBuilder to a JsonItemBuilder
      * @return The ItemBuilder as JSON String
      */
@@ -415,7 +422,7 @@ public class ItemBuilder {
     }
 
 
-    /*
+    /**
      * Converts the JsonItemBuilder back to a ItemBuilder
      * @param json Which JsonItemBuilder should be converted
      */

@@ -92,7 +92,6 @@ public final class InventoryUpdate {
      * @param player   whose inventory will be updated.
      * @param newTitle the new title for the inventory.
      */
-
     public static void updateInventory(JavaPlugin plugin, Player player, String newTitle) {
         Validate.notNull(player, "Cannot update inventory to null player.");
 

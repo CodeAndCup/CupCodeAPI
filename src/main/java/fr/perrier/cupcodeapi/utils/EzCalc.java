@@ -6,6 +6,9 @@ import org.bukkit.util.Vector;
 
 public class EzCalc {
 
+    /**
+     * Retourne la location devant le joueur, à une distance donnée, en gardant la même hauteur (Y).
+     */
     public static Location getLocationInFrontOfPlayer(Player player, double distance) {
         Location loc = player.getLocation();
         Vector direction = loc.getDirection().normalize();
@@ -17,6 +20,9 @@ public class EzCalc {
         return new Location(loc.getWorld(), x, y, z, loc.getYaw(), loc.getPitch());
     }
 
+    /**
+     * Retourne une location devant le joueur, mais avec la même hauteur (Y) que le joueur.
+     */
     public static Location getLocationInFrontOfPlayer_YFlat(Player player, double distance) {
         Location loc = player.getLocation();
         Vector direction = loc.getDirection().normalize();
@@ -28,7 +34,9 @@ public class EzCalc {
         return new Location(loc.getWorld(), x, y, z, loc.getYaw(), loc.getPitch());
     }
 
-
+    /**
+     * Retourne la location entre deux locations (le milieu).
+     */
     public static Location getLocationBetween(Location loc1, Location loc2) {
         double x = (loc1.getX() + loc2.getX()) / 2;
         double y = (loc1.getY() + loc2.getY()) / 2;

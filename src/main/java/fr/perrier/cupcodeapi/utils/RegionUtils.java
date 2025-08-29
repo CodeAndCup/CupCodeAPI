@@ -34,10 +34,6 @@ public class RegionUtils {
         double maxY = Math.max(pos1.getY(), pos2.getY());
         double maxZ = Math.max(pos1.getZ(), pos2.getZ());
 
-        /*Bukkit.broadcastMessage("X: " + minX + " < " + loc.getX() + " < " + maxX);
-        Bukkit.broadcastMessage("Y: " + minY + " < " + loc.getY() + " < " + maxY);
-        Bukkit.broadcastMessage("Z: " + minZ + " < " + loc.getZ() + " < " + maxZ);*/
-
         return loc.getX() >= minX && loc.getX() <= maxX
                 && loc.getY() >= minY && loc.getY() <= maxY
                 && loc.getZ() >= minZ && loc.getZ() <= maxZ;

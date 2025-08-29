@@ -197,13 +197,16 @@ public class ConversationUtil {
         }
     }
 
-    // Example usage:
-    // public static void askForTavernName(Player player, Consumer<String> onNameReceived) {
-    //     createConversation(player)
-    //         .withPrompt("&aPlease enter a name for your tavern:")
-    //         .withValidator(input -> input.length() >= 3)
-    //         .withInvalidMessage("&cTavern name must be at least 3 characters long.")
-    //         .onSuccess(onNameReceived)
-    //         .start();
-    // }
+    /*
+    Example usage:
+
+    public static void askForTavernName(Player player, Consumer<String> onNameReceived) {
+         createConversation(player)
+             .withPrompt("&aPlease enter a name for your tavern:")
+             .withValidator(input -> input.length() >= 3)
+             .withInvalidMessage("&cTavern name must be at least 3 characters long.")
+             .onSuccess(onNameReceived)
+             .start();
+    }
+    */
 }

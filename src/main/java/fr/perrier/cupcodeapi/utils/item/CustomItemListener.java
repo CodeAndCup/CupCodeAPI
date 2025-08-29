@@ -6,6 +6,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class CustomItemListener implements Listener {
 
+    /**
+     * When a player interacts with an item, we check if it's a custom item.
+     * If it is, we call the associated callable.
+     *
+     * @param event the PlayerInteractEvent
+     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getItem() == null) return;

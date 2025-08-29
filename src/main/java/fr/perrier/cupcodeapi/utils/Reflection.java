@@ -1,18 +1,22 @@
 package fr.perrier.cupcodeapi.utils;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class Reflection {
 
+    /**
+     * Gets the NMS class from the given class name.
+     *
+     * @param className The name of the NMS class.
+     * @return The NMS class, or null if not found.
+     */
     public static Class<?> getNMSClass(final String className) {
         try {
             return PackageType.MINECRAFT_SERVER.getClass(className);
@@ -22,6 +26,12 @@ public class Reflection {
         }
     }
 
+    /**
+     * Gets the OBC class from the given class name.
+     *
+     * @param className The name of the OBC class.
+     * @return The OBC class, or null if not found.
+     */
     public static Class<?> getOBCClass(final String className) {
         try {
             return PackageType.CRAFTBUKKIT.getClass(className);
@@ -31,6 +41,12 @@ public class Reflection {
         }
     }
 
+    /**
+     * Sends a packet to the given player.
+     *
+     * @param player The player to send the packet to.
+     * @param packet The packet to send.
+     */
     public static void sendPacket(final Player player, final Object packet) {
         try {
             final Class<?> packetClass = getNMSClass("Packet");
@@ -45,6 +61,14 @@ public class Reflection {
         }
     }
 
+    /**
+     * Makes a method from the given class, method name and parameters.
+     *
+     * @param clazz      The class to get the method from.
+     * @param methodName The name of the method.
+     * @param paramaters The parameters of the method.
+     * @return The method, or null if not found.
+     */
     public static Method makeMethod(final Class<?> clazz, final String methodName, final Class<?>... paramaters) {
         try {
             return clazz.getDeclaredMethod(methodName, paramaters);
@@ -55,6 +79,15 @@ public class Reflection {
         }
     }
 
+    /**
+     * Calls the given method on the given instance with the given parameters.
+     *
+     * @param method     The method to call.
+     * @param instance   The instance to call the method on.
+     * @param paramaters The parameters to pass to the method.
+     * @param <T>        The return type of the method.
+     * @return The result of the method call.
+     */
     public static <T> T callMethod(final Method method, final Object instance, final Object... paramaters) {
         if (method == null) {
             throw new RuntimeException("No such method");
@@ -69,6 +102,14 @@ public class Reflection {
         }
     }
 
+    /**
+     * Makes a constructor from the given class and parameter types.
+     *
+     * @param clazz          The class to get the constructor from.
+     * @param paramaterTypes The parameter types of the constructor.
+     * @param <T>            The type of the class.
+     * @return The constructor, or null if not found.
+     */
     public static <T> Constructor<T> makeConstructor(final Class<?> clazz, final Class<?>... paramaterTypes) {
         try {
             return (Constructor<T>) clazz.getConstructor(paramaterTypes);
@@ -79,6 +120,14 @@ public class Reflection {
         }
     }
 
+    /**
+     * Calls the given constructor with the given parameters.
+     *
+     * @param constructor The constructor to call.
+     * @param paramaters  The parameters to pass to the constructor.
+     * @param <T>         The type of the class.
+     * @return The result of the constructor call.
+     */
     public static <T> T callConstructor(final Constructor<T> constructor, final Object... paramaters) {
         if (constructor == null) {
             throw new RuntimeException("No such constructor");
@@ -93,6 +142,13 @@ public class Reflection {
         }
     }
 
+    /**
+     * Makes a field from the given class and field name.
+     *
+     * @param clazz The class to get the field from.
+     * @param name  The name of the field.
+     * @return The field, or null if not found.
+     */
     public static Field makeField(final Class<?> clazz, final String name) {
         try {
             return clazz.getDeclaredField(name);
@@ -103,6 +159,14 @@ public class Reflection {
         }
     }
 
+    /**
+     * Gets the value of the given field from the given instance.
+     *
+     * @param field    The field to get the value from.
+     * @param instance The instance to get the value from.
+     * @param <T>      The type of the field.
+     * @return The value of the field.
+     */
     public static <T> T getField(final Field field, final Object instance) {
         if (field == null) {
             throw new RuntimeException("No such field");
@@ -115,6 +179,13 @@ public class Reflection {
         }
     }
 
+    /**
+     * Sets the value of the given field on the given instance.
+     *
+     * @param field    The field to set the value on.
+     * @param instance The instance to set the value on.
+     * @param value    The value to set.
+     */
     public static void setField(final Field field, final Object instance, final Object value) {
         if (field == null) {
             throw new RuntimeException("No such field");
@@ -127,6 +198,12 @@ public class Reflection {
         }
     }
 
+    /**
+     * Gets the class from the given class name.
+     *
+     * @param name The name of the class.
+     * @return The class, or null if not found.
+     */
     public static Class<?> getClass(final String name) {
         try {
             return Class.forName(name);
@@ -135,6 +212,14 @@ public class Reflection {
         }
     }
 
+    /**
+     * Gets the class from the given class name and superclass.
+     *
+     * @param name       The name of the class.
+     * @param superClass The superclass of the class.
+     * @param <T>        The type of the superclass.
+     * @return The class, or null if not found or not a subclass of the superclass.
+     */
     public static <T> Class<? extends T> getClass(final String name, final Class<T> superClass) {
         try {
             return Class.forName(name).asSubclass(superClass);
@@ -143,6 +228,12 @@ public class Reflection {
         }
     }
 
+    /**
+     * Gets the handle of the given object.
+     *
+     * @param obj The object to get the handle from.
+     * @return The handle of the object, or null if not found.
+     */
     public static Object getHandle(final Object obj) {
         try {
             return getMethod(obj.getClass(), "getHandle").invoke(obj);
@@ -152,6 +243,13 @@ public class Reflection {
         }
     }
 
+    /**
+     * Gets the field from the given class and field name.
+     *
+     * @param clazz The class to get the field from.
+     * @param name  The name of the field.
+     * @return The field, or null if not found.
+     */
     public static Field getField(final Class<?> clazz, final String name) {
         try {
             final Field field = clazz.getDeclaredField(name);
@@ -163,6 +261,16 @@ public class Reflection {
         }
     }
 
+    /**
+     * Compares two class lists for equality.
+     * The lists are considered equal if they have the same length and
+     * all corresponding classes are equal.
+     * The order of the classes in the lists matters.
+     *
+     * @param l1 The first class list to compare.
+     * @param l2 The class lists to compare.
+     * @return true if the lists are equal, false otherwise.
+     */
     public static boolean compareClassList(final Class<?>[] l1, final Class<?>[] l2) {
         boolean equal = true;
         if (l1.length != l2.length) {
@@ -177,6 +285,14 @@ public class Reflection {
         return equal;
     }
 
+    /**
+     * Gets the constructor from the given class and parameter types.
+     *
+     * @param clazz          The class to get the constructor from.
+     * @param parameterTypes The parameter types of the constructor.
+     * @return The constructor.
+     * @throws NoSuchMethodException If there is no such constructor in this class with the specified parameter types.
+     */
     public static Constructor<?> getConstructor(final Class<?> clazz, final Class<?>... parameterTypes) throws NoSuchMethodException {
         final Class<?>[] primitiveTypes = DataType.getPrimitive(parameterTypes);
         for (final Constructor<?> constructor : clazz.getConstructors()) {
@@ -187,18 +303,63 @@ public class Reflection {
         throw new NoSuchMethodException("There is no such constructor in this class with the specified parameter types");
     }
 
+    /**
+     * Gets the constructor from the given class name, package type and parameter types.
+     *
+     * @param className      The name of the class to get the constructor from.
+     * @param packageType    The package type of the class to get the constructor from.
+     * @param parameterTypes The parameter types of the constructor.
+     * @return The constructor.
+     * @throws NoSuchMethodException  If there is no such constructor in this class with the specified parameter types.
+     * @throws ClassNotFoundException If the class with the specified name and package type cannot be found.
+     */
     public static Constructor<?> getConstructor(final String className, final PackageType packageType, final Class<?>... parameterTypes) throws NoSuchMethodException, ClassNotFoundException {
         return getConstructor(packageType.getClass(className), parameterTypes);
     }
 
+    /**
+     * Instantiates an object of the given class with the given arguments.
+     *
+     * @param clazz     The class to instantiate.
+     * @param arguments The arguments to pass to the constructor.
+     * @return The instantiated object.
+     * @throws InstantiationException    If the class that declares the underlying constructor represents an abstract class.
+     * @throws IllegalAccessException    If this Constructor object is enforcing Java language access control and the underlying constructor is inaccessible.
+     * @throws IllegalArgumentException  If the number of actual and formal parameters differ; if an unwrapping conversion for primitive arguments fails; or if, after possible unwrapping, a parameter value cannot be converted to the corresponding formal parameter type by a method invocation conversion.
+     * @throws InvocationTargetException If the underlying constructor throws an exception.
+     * @throws NoSuchMethodException     If there is no such constructor in this class with the specified parameter types.
+     */
     public static Object instantiateObject(final Class<?> clazz, final Object... arguments) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
         return getConstructor(clazz, DataType.getPrimitive(arguments)).newInstance(arguments);
     }
 
+    /**
+     * Instantiates an object of the given class name and package type with the given arguments.
+     *
+     * @param className   The name of the class to instantiate.
+     * @param packageType The package type of the class to instantiate.
+     * @param arguments   The arguments to pass to the constructor.
+     * @return The instantiated object.
+     * @throws InstantiationException    If the class that declares the underlying constructor represents an abstract class.
+     * @throws IllegalAccessException    If this Constructor object is enforcing Java language access control and the underlying constructor is inaccessible.
+     * @throws IllegalArgumentException  If the number of actual and formal parameters differ; if an unwrapping conversion for primitive arguments fails; or if, after possible unwrapping, a parameter value cannot be converted to the corresponding formal parameter type by a method invocation conversion.
+     * @throws InvocationTargetException If the underlying constructor throws an exception.
+     * @throws NoSuchMethodException     If there is no such constructor in this class with the specified parameter types.
+     * @throws ClassNotFoundException    If the class with the specified name and package type cannot be found.
+     */
     public static Object instantiateObject(final String className, final PackageType packageType, final Object... arguments) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
         return instantiateObject(packageType.getClass(className), arguments);
     }
 
+    /**
+     * Gets the method from the given class, method name and parameter types.
+     *
+     * @param clazz          The class to get the method from.
+     * @param methodName     The name of the method.
+     * @param parameterTypes The parameter types of the method.
+     * @return The method.
+     * @throws NoSuchMethodException If there is no such method in this class with the specified name and parameter types.
+     */
     public static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) throws NoSuchMethodException {
         final Class<?>[] primitiveTypes = DataType.getPrimitive(parameterTypes);
         for (final Method method : clazz.getMethods()) {
@@ -209,64 +370,298 @@ public class Reflection {
         throw new NoSuchMethodException("There is no such method in this class with the specified name and parameter types");
     }
 
+    /**
+     * Gets the method from the given class name, package type, method name and parameter types.
+     *
+     * @param className      The name of the class to get the method from.
+     * @param packageType    The package type of the class to get the method from.
+     * @param methodName     The name of the method.
+     * @param parameterTypes The parameter types of the method.
+     * @return The method.
+     * @throws NoSuchMethodException  If there is no such method in this class with the specified name and parameter types.
+     * @throws ClassNotFoundException If the class with the specified name and package type cannot be found.
+     */
     public static Method getMethod(final String className, final PackageType packageType, final String methodName, final Class<?>... parameterTypes) throws NoSuchMethodException, ClassNotFoundException {
         return getMethod(packageType.getClass(className), methodName, parameterTypes);
     }
 
+    /**
+     * Invokes the given method on the given instance with the given arguments.
+     *
+     * @param instance   The instance to invoke the method on.
+     * @param methodName The name of the method to invoke.
+     * @param arguments  The arguments to pass to the method.
+     * @return The result of the method invocation.
+     * @throws IllegalAccessException    If this Method object is enforcing Java language access control and the underlying method is inaccessible.
+     * @throws IllegalArgumentException  If the method is an instance method and the specified object argument is not an instance of the class or interface declaring the underlying method (or of a subclass or implementor thereof); if the number of actual and formal parameters differ; if an unwrapping conversion for primitive arguments fails; or if, after possible unwrapping, a parameter value cannot be converted to the corresponding formal parameter type by a method invocation conversion.
+     * @throws InvocationTargetException If the underlying method throws an exception.
+     * @throws NoSuchMethodException     If there is no such method in this class with the specified name and parameter types.
+     */
     public static Object invokeMethod(final Object instance, final String methodName, final Object... arguments) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
         return getMethod(instance.getClass(), methodName, DataType.getPrimitive(arguments)).invoke(instance, arguments);
     }
 
+    /**
+     * Invokes the given method on the given instance with the given arguments.
+     *
+     * @param instance   The instance to invoke the method on.
+     * @param clazz      The class to get the method from.
+     * @param methodName The name of the method to invoke.
+     * @param arguments  The arguments to pass to the method.
+     * @return The result of the method invocation.
+     * @throws IllegalAccessException    If this Method object is enforcing Java language access control and the underlying method is inaccessible.
+     * @throws IllegalArgumentException  If the method is an instance method and the specified object argument is not an instance of the class or interface declaring the underlying method (or of a subclass or implementor thereof); if the number of actual and formal parameters differ; if an unwrapping conversion for primitive arguments fails; or if, after possible unwrapping, a parameter value cannot be converted to the corresponding formal parameter type by a method invocation conversion.
+     * @throws InvocationTargetException If the underlying method throws an exception.
+     * @throws NoSuchMethodException     If there is no such method in this class with the specified name and parameter types.
+     */
     public static Object invokeMethod(final Object instance, final Class<?> clazz, final String methodName, final Object... arguments) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
         return getMethod(clazz, methodName, DataType.getPrimitive(arguments)).invoke(instance, arguments);
     }
 
+    /**
+     * Invokes the given method on the given instance with the given arguments.
+     *
+     * @param instance   The instance to invoke the method on.
+     * @param className  The name of the class to get the method from.
+     * @param packageType The package type of the class to get the method from.
+     * @param methodName The name of the method to invoke.
+     * @param arguments  The arguments to pass to the method.
+     * @return The result of the method invocation.
+     * @throws IllegalAccessException    If this Method object is enforcing Java language access control and the underlying method is inaccessible.
+     * @throws IllegalArgumentException  If the method is an instance method and the specified object argument is not an instance of the class or interface declaring the underlying method (or of a subclass or implementor thereof); if the number of actual and formal parameters differ; if an unwrapping conversion for primitive arguments fails; or if, after possible unwrapping, a parameter value cannot be converted to the corresponding formal parameter type by a method invocation conversion.
+     * @throws InvocationTargetException If the underlying method throws an exception.
+     * @throws NoSuchMethodException     If there is no such method in this class with the specified name and parameter types.
+     * @throws ClassNotFoundException    If the class with the specified name and package type cannot be found.
+     */
     public static Object invokeMethod(final Object instance, final String className, final PackageType packageType, final String methodName, final Object... arguments) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
         return invokeMethod(instance, packageType.getClass(className), methodName, arguments);
     }
 
+    /**
+     * Gets the field from the given class, declared flag and field name.
+     *
+     * @param clazz      The class to get the field from.
+     * @param declared   Whether to get a declared field or not.
+     * @param fieldName  The name of the field.
+     * @return The field.
+     * @throws NoSuchFieldException If there is no such field in this class with the specified name.
+     * @throws SecurityException    If a security manager, s, is present and any of the following conditions is met:
+     *                              <ul>
+     *                              <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                              <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                              <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                              </ul>
+     */
     public static Field getField(final Class<?> clazz, final boolean declared, final String fieldName) throws NoSuchFieldException, SecurityException {
         final Field field = declared ? clazz.getDeclaredField(fieldName) : clazz.getField(fieldName);
         field.setAccessible(true);
         return field;
     }
 
+    /**
+     * Gets the field from the given class name, package type, declared flag and field name.
+     *
+     * @param className  The name of the class to get the field from.
+     * @param packageType The package type of the class to get the field from.
+     * @param declared   Whether to get a declared field or not.
+     * @param fieldName  The name of the field.
+     * @return The field.
+     * @throws NoSuchFieldException  If there is no such field in this class with the specified name.
+     * @throws SecurityException     If a security manager, s, is present and any of the following conditions is met:
+     *                               <ul>
+     *                               <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                               <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                               <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                               </ul>
+     * @throws ClassNotFoundException If the class with the specified name and package type cannot be found.
+     */
     public static Field getField(final String className, final PackageType packageType, final boolean declared, final String fieldName) throws NoSuchFieldException, SecurityException, ClassNotFoundException {
         return getField(packageType.getClass(className), declared, fieldName);
     }
 
+    /**
+     * Gets the value of the given field from the given instance.
+     *
+     * @param instance  The instance to get the field value from.
+     * @param clazz     The class to get the field from.
+     * @param declared  Whether to get a declared field or not.
+     * @param fieldName The name of the field.
+     * @return The value of the field.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     */
     public static Object getValue(final Object instance, final Class<?> clazz, final boolean declared, final String fieldName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         return getField(clazz, declared, fieldName).get(instance);
     }
 
+    /**
+     * Gets the value of the given field from the given instance.
+     *
+     * @param instance   The instance to get the field value from.
+     * @param className  The name of the class to get the field from.
+     * @param packageType The package type of the class to get the field from.
+     * @param declared   Whether to get a declared field or not.
+     * @param fieldName  The name of the field.
+     * @return The value of the field.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     * @throws ClassNotFoundException    If the class with the specified name and package type cannot be found.
+     */
     public static Object getValue(final Object instance, final String className, final PackageType packageType, final boolean declared, final String fieldName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, ClassNotFoundException {
         return getValue(instance, packageType.getClass(className), declared, fieldName);
     }
 
+    /**
+     * Gets the value of the given field from the given instance.
+     *
+     * @param instance  The instance to get the field value from.
+     * @param declared  Whether to get a declared field or not.
+     * @param fieldName The name of the field.
+     * @return The value of the field.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     */
     public static Object getValue(final Object instance, final boolean declared, final String fieldName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         return getValue(instance, instance.getClass(), declared, fieldName);
     }
 
+    /**
+     * Sets the value of the given field on the given instance.
+     *
+     * @param instance  The instance to set the field value on.
+     * @param clazz     The class to get the field from.
+     * @param declared  Whether to get a declared field or not.
+     * @param fieldName The name of the field.
+     * @param value     The value to set.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     */
     public static void setValue(final Object instance, final Class<?> clazz, final boolean declared, final String fieldName, final Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         getField(clazz, declared, fieldName).set(instance, value);
     }
 
+    /**
+     * Sets the value of the given field on the given instance.
+     *
+     * @param instance   The instance to set the field value on.
+     * @param className  The name of the class to get the field from.
+     * @param packageType The package type of the class to get the field from.
+     * @param declared   Whether to get a declared field or not.
+     * @param fieldName  The name of the field.
+     * @param value      The value to set.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     * @throws ClassNotFoundException    If the class with the specified name and package type cannot be found.
+     */
     public static void setValue(final Object instance, final String className, final PackageType packageType, final boolean declared, final String fieldName, final Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, ClassNotFoundException {
         setValue(instance, packageType.getClass(className), declared, fieldName, value);
     }
 
+    /**
+     * Sets the value of the given field on the given instance.
+     *
+     * @param instance  The instance to set the field value on.
+     * @param declared  Whether to get a declared field or not.
+     * @param fieldName The name of the field.
+     * @param value     The value to set.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     */
     public static void setValue(final Object instance, final boolean declared, final String fieldName, final Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         setValue(instance, instance.getClass(), declared, fieldName, value);
     }
 
+    /**
+     * Sets the value of the given field on the given instance.
+     * This method assumes that the field is declared in the class of the instance.
+     *
+     * @param instance  The instance to set the field value on.
+     * @param fieldName The name of the field.
+     * @param value     The value to set.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     */
     public static void setValue(final Object instance, final String fieldName, final Object value) throws NoSuchFieldException, IllegalAccessException {
         setValue(instance, true, fieldName, value);
     }
 
+    /**
+     * Gets the value of the given field from the given instance.
+     * This method assumes that the field is declared in the class of the instance.
+     *
+     * @param instance  The instance to get the field value from.
+     * @param fieldName The name of the field.
+     * @return The value of the field.
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field (or a subclass or implementor thereof).
+     * @throws IllegalAccessException   If this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+     * @throws NoSuchFieldException     If there is no such field in this class with the specified name.
+     * @throws SecurityException        If a security manager, s, is present and any of the following conditions is met:
+     *                                  <ul>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPackageAccess() denies access to the package of this class.</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link RuntimePermission}("accessDeclaredMembers")</li>
+     *                                  <li>The caller's class loader is not the same as or an ancestor of the class loader for the current class and invocation of s.checkPermission() denies {@link ReflectPermission}("suppressAccessChecks")</li>
+     *                                  </ul>
+     */
     public static Object getValue(final Object instance, final String fieldName) throws NoSuchFieldException, IllegalAccessException {
         return getValue(instance, true, fieldName);
     }
 
+    /**
+     * Sets the value of the given static final field.
+     *
+     * @param field The field to set the value of.
+     * @param value The value to set.
+     * @throws ReflectiveOperationException If the field is not static or final, or if the field is not accessible.
+     */
     public static void setFinalStatic(final Field field, final Object value) throws ReflectiveOperationException {
         field.setAccessible(true);
         Class.class.getModifiers();
@@ -276,6 +671,14 @@ public class Reflection {
         field.set(null, value);
     }
 
+    /**
+     * Sets the value of the given final field on the given object.
+     *
+     * @param object The object to set the field value on.
+     * @param field  The field to set the value of.
+     * @param value  The value to set.
+     * @throws ReflectiveOperationException If the field is not final, or if the field is not accessible.
+     */
     public static void setFinal(final Object object, final Field field, final Object value) throws ReflectiveOperationException {
         field.setAccessible(true);
         final Field mf = Field.class.getDeclaredField("modifiers");
@@ -284,6 +687,9 @@ public class Reflection {
         field.set(object, value);
     }
 
+    /**
+     * Enum representing different package types in a Minecraft server environment.
+     */
     public enum PackageType {
         MINECRAFT_SERVER("net.minecraft.server." + getServerVersion()),
         CRAFTBUKKIT("org.bukkit.craftbukkit." + getServerVersion()),
@@ -309,27 +715,60 @@ public class Reflection {
 
         private final String path;
 
+        /**
+         * Constructs a PackageType with the specified path.
+         *
+         * @param path The path of the package type.
+         */
         private PackageType(final String path) {
             this.path = path;
         }
 
+        /**
+         * Constructs a PackageType with the specified parent package type and path.
+         *
+         * @param parent The parent package type.
+         * @param path   The path of the package type.
+         */
         private PackageType(final PackageType parent, final String path) {
             this(parent + "." + path);
         }
 
+        /**
+         * Gets the server version from the Bukkit server package name.
+         *
+         * @return The server version as a string.
+         */
         public static String getServerVersion() {
             final String name = Bukkit.getServer().getClass().getPackage().getName();
             return name.substring(name.lastIndexOf(46) + 1);
         }
 
+        /**
+         * Gets the path of the package type.
+         *
+         * @return The path of the package type.
+         */
         public String getPath() {
             return this.path;
         }
 
+        /**
+         * Gets the class with the specified name from this package type.
+         *
+         * @param className The name of the class to get.
+         * @return The class with the specified name.
+         * @throws ClassNotFoundException If the class with the specified name cannot be found in this package type.
+         */
         public Class<?> getClass(final String className) throws ClassNotFoundException {
             return Class.forName(this + "." + className);
         }
 
+        /**
+         * Returns the string representation of the package type, which is its path.
+         *
+         * @return The path of the package type.
+         */
         @Override
         public String toString() {
             return this.path;
@@ -350,25 +789,58 @@ public class Reflection {
         private final Class<?> primitive;
         private final Class<?> reference;
 
+        /**
+         * Constructs a DataType with the specified primitive and reference classes.
+         *
+         * @param primitive The primitive class.
+         * @param reference The reference class.
+         */
         private DataType(final Class<?> primitive, final Class<?> reference) {
             this.primitive = primitive;
             this.reference = reference;
         }
 
+        /**
+         * Gets the DataType corresponding to the given class.
+         *
+         * @param clazz The class to get the DataType for.
+         * @return The DataType corresponding to the given class, or null if the class is not a primitive or reference type.
+         */
         public static DataType fromClass(final Class<?> clazz) {
             return DataType.CLASS_MAP.get(clazz);
         }
 
+        /**
+         * Gets the primitive class corresponding to the given class.
+         * If the given class is not a primitive or reference type, it is returned as is.
+         *
+         * @param clazz The class to get the primitive class for.
+         * @return The primitive class corresponding to the given class, or the given class if it is not a primitive or reference type.
+         */
         public static Class<?> getPrimitive(final Class<?> clazz) {
             final DataType type = fromClass(clazz);
             return (type == null) ? clazz : type.getPrimitive();
         }
 
+        /**
+         * Gets the reference class corresponding to the given class.
+         * If the given class is not a primitive or reference type, it is returned as is.
+         *
+         * @param clazz The class to get the reference class for.
+         * @return The reference class corresponding to the given class, or the given class if it is not a primitive or reference type.
+         */
         public static Class<?> getReference(final Class<?> clazz) {
             final DataType type = fromClass(clazz);
             return (type == null) ? clazz : type.getReference();
         }
 
+        /**
+         * Gets an array of primitive classes corresponding to the given array of classes.
+         * If a class in the array is not a primitive or reference type, it is returned as is.
+         *
+         * @param classes The array of classes to get the primitive classes for.
+         * @return An array of primitive classes corresponding to the given array of classes.
+         */
         public static Class<?>[] getPrimitive(final Class<?>[] classes) {
             final int length = (classes == null) ? 0 : classes.length;
             final Class<?>[] types = (Class<?>[]) new Class[length];
@@ -378,6 +850,13 @@ public class Reflection {
             return types;
         }
 
+        /**
+         * Gets an array of reference classes corresponding to the given array of classes.
+         * If a class in the array is not a primitive or reference type, it is returned as is.
+         *
+         * @param classes The array of classes to get the reference classes for.
+         * @return An array of reference classes corresponding to the given array of classes.
+         */
         public static Class<?>[] getReference(final Class<?>[] classes) {
             final int length = (classes == null) ? 0 : classes.length;
             final Class<?>[] types = (Class<?>[]) new Class[length];
@@ -387,6 +866,13 @@ public class Reflection {
             return types;
         }
 
+        /**
+         * Gets an array of primitive classes corresponding to the classes of the given array of objects.
+         * If the class of an object in the array is not a primitive or reference type, it is returned as is.
+         *
+         * @param objects The array of objects to get the primitive classes for.
+         * @return An array of primitive classes corresponding to the classes of the given array of objects.
+         */
         public static Class<?>[] getPrimitive(final Object[] objects) {
             final int length = (objects == null) ? 0 : objects.length;
             final Class<?>[] types = (Class<?>[]) new Class[length];
@@ -396,6 +882,13 @@ public class Reflection {
             return types;
         }
 
+        /**
+         * Gets an array of reference classes corresponding to the classes of the given array of objects.
+         * If the class of an object in the array is not a primitive or reference type, it is returned as is.
+         *
+         * @param objects The array of objects to get the reference classes for.
+         * @return An array of reference classes corresponding to the classes of the given array of objects.
+         */
         public static Class<?>[] getReference(final Object[] objects) {
             final int length = (objects == null) ? 0 : objects.length;
             final Class<?>[] types = (Class<?>[]) new Class[length];
@@ -405,6 +898,14 @@ public class Reflection {
             return types;
         }
 
+        /**
+         * Compares two arrays of classes for equality, considering assignability.
+         * Two arrays are considered equal if they have the same length and each class in the primary array is either equal to or assignable from the corresponding class in the secondary array.
+         *
+         * @param primary   The primary array of classes.
+         * @param secondary The secondary array of classes.
+         * @return true if the arrays are considered equal, false otherwise.
+         */
         public static boolean compare(final Class<?>[] primary, final Class<?>[] secondary) {
             if (primary == null || secondary == null || primary.length != secondary.length) {
                 return false;
@@ -419,14 +920,27 @@ public class Reflection {
             return true;
         }
 
+        /**
+         * Gets the primitive class of this DataType.
+         *
+         * @return The primitive class of this DataType.
+         */
         public Class<?> getPrimitive() {
             return this.primitive;
         }
 
+        /**
+         * Gets the reference class of this DataType.
+         *
+         * @return The reference class of this DataType.
+         */
         public Class<?> getReference() {
             return this.reference;
         }
 
+        /**
+         * Static initializer to populate the CLASS_MAP with primitive and reference class mappings.
+         */
         static {
             CLASS_MAP = new HashMap<Class<?>, DataType>();
             for (final DataType type : values()) {
@@ -436,6 +950,9 @@ public class Reflection {
         }
     }
 
+    /**
+     * Enum representing different packet types in a Minecraft server environment.
+     */
     public enum PacketType {
         HANDSHAKING_IN_SET_PROTOCOL("PacketHandshakingInSetProtocol"),
         LOGIN_IN_ENCRYPTION_BEGIN("PacketLoginInEncryptionBegin"),
@@ -538,17 +1055,25 @@ public class Reflection {
         STATUS_OUT_SERVER_INFO("PacketStatusOutServerInfo");
 
         private static final Map<String, PacketType> NAME_MAP;
+        @Getter
         private final String name;
         private Class<?> packet;
 
+        /**
+         * Constructs a PacketType with the specified name.
+         *
+         * @param name The name of the packet type.
+         */
         private PacketType(final String name) {
             this.name = name;
         }
 
-        public String getName() {
-            return this.name;
-        }
-
+        /**
+         * Gets the Class object representing the packet type.
+         *
+         * @return The Class object representing the packet type.
+         * @throws ClassNotFoundException If the class with the specified name cannot be found in the Minecraft server package.
+         */
         public Class<?> getPacket() throws ClassNotFoundException {
             return (this.packet == null) ? (this.packet = PackageType.MINECRAFT_SERVER.getClass(this.name)) : this.packet;
         }
