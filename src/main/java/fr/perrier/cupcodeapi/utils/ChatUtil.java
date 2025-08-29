@@ -152,30 +152,42 @@ public class ChatUtil {
             return message;
         }
 
-        final Pattern gradientPattern = Pattern.compile("<gradient:(#?[A-Fa-f0-9]{6})(?::(\\d+))?>(.*?)</gradient:(#?[A-Fa-f0-9]{6})>");
+        // Opening tag with color and optional maxColors
+        // Content that doesn't contain gradient tags
+        final Pattern gradientPattern = Pattern.compile(
+                "<gradient:(#?[A-Fa-f0-9]{6})(?::(\\\\d+))?>([^<]*(?:<(?!\\/?gradient:)[^<]*)*)<\\/gradient:(#?[A-Fa-f0-9]{6})>"
+        );
+
         Matcher matcher = gradientPattern.matcher(message);
         StringBuffer buffer = new StringBuffer();
 
         while (matcher.find()) {
             String startColor = matcher.group(1).replace("#", "");
-            String maxColorsStr = matcher.group(2); // This will be null if not specified
+            String maxColorsStr = matcher.group(2);
             String text = matcher.group(3);
             String endColor = matcher.group(4).replace("#", "");
+
+            if (startColor.equalsIgnoreCase(endColor)) continue;
 
             int maxColors = defaultMaxColors;
             if (maxColorsStr != null) {
                 try {
                     maxColors = Integer.parseInt(maxColorsStr);
+                    maxColors = Math.max(1, Math.min(maxColors, 100));
                 } catch (NumberFormatException ignored) {
                 }
             }
 
-            String gradientText = gradient(text, startColor, endColor, maxColors);
-            matcher.appendReplacement(buffer, Matcher.quoteReplacement(gradientText));
+            try {
+                String gradientText = gradient(text, startColor, endColor, maxColors);
+                matcher.appendReplacement(buffer, Matcher.quoteReplacement(gradientText));
+            } catch (Exception e) {
+                String fallbackText = translateHexColorCode(startColor) + text;
+                matcher.appendReplacement(buffer, Matcher.quoteReplacement(fallbackText));
+            }
         }
 
-        String result = matcher.appendTail(buffer).toString();
-        return translate(result);
+        return matcher.appendTail(buffer).toString();
     }
 
     /**
