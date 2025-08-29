@@ -2,6 +2,7 @@ package fr.perrier.cupcodeapi.utils;
 
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +53,55 @@ public class ChatUtil {
      */
     public static String getBar() {
         return translate("&8&m\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020&r");
+    }
+
+    /**
+     * Converts a string to small caps using Unicode characters.
+     * Only lowercase a-z are converted; other characters remain unchanged.
+     * @param message The input string
+     * @return The string converted to small caps
+     */
+    public static String toSmallCaps(String message) {
+        HashMap<Character,String> smallCaps = new HashMap<>(){
+            {
+                put('a',"ᴀ");
+                put('b',"ʙ");
+                put('c', "ᴄ");
+                put('d', "ᴅ");
+                put('e', "ᴇ");
+                put('f', "ғ");
+                put('g', "ɢ");
+                put('h', "ʜ");
+                put('i', "ɪ");
+                put('j', "ᴊ");
+                put('k', "ᴋ");
+                put('l', "ʟ");
+                put('m', "ᴍ");
+                put('n', "ɴ");
+                put('o', "ᴏ");
+                put('p', "ᴘ");
+                put('q', "ǫ");
+                put('r', "ʀ");
+                put('s', "s");
+                put('t', "ᴛ");
+                put('u', "ᴜ");
+                put('v', "ᴠ");
+                put('w', "ᴡ");
+                put('x', "x");
+                put('y', "ʏ");
+                put('z', "ᴢ");
+            }
+        };
+
+        StringBuilder result = new StringBuilder();
+        for (char c : message.toCharArray()) {
+            if (smallCaps.containsKey(c)) {
+                result.append(smallCaps.get(c));
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 
     /**
