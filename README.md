@@ -24,7 +24,7 @@ Elle fournit des outils puissants pour manipuler les entités `TextDisplay`, cr�
 ## Installation
 
 CupCodeAPI est disponible via Maven.  
-Ajoutez le dépôt GitHub Packages et la dépendance suivante à votre `pom.xml` :
+Ajoutez le dépôt GitHub Packages et la dépendance suivante à votre `pom.xml`:
 
 ```xml
 <repositories>

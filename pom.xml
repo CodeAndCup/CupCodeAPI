@@ -6,7 +6,7 @@
 
     <groupId>fr.perrier</groupId>
     <artifactId>cupcodeapi</artifactId>
-    <version>1.21.3-v1.1.1</version>
+    <version>1.21.3-v1.1.2</version>
     <packaging>jar</packaging>
 
     <name>CupCodeAPI</name>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>com.github.cryptomorin</groupId>
             <artifactId>XSeries</artifactId>
-            <version>13.2.0</version>
+            <version>13.3.3</version>
         </dependency>
     </dependencies>
 </project>
