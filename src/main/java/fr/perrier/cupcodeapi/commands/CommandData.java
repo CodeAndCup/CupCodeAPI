@@ -71,13 +71,19 @@ public final class CommandData {
             return true;
         }
 
-        return player.isOp() || player.hasPermission(permission);
+        return player.isOp() || permission.isEmpty() || player.hasPermission(permission);
     }
 
     public String getUsageString() {
         return (getUsageString(getName()));
     }
 
+    /**
+     * Get a usage string for this command, using the alias given.
+     *
+     * @param aliasUsed The alias to use in the usage string.
+     * @return The usage string.
+     */
     public String getUsageString(String aliasUsed) {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -90,6 +96,12 @@ public final class CommandData {
         return ("/" + aliasUsed.toLowerCase() + " " + stringBuilder.toString().trim().toLowerCase());
     }
 
+    /**
+     * Execute the command.
+     *
+     * @param sender The sender of the command.
+     * @param params The parameters given to the command, not including the command name.
+     */
     public void execute(CommandSender sender, String[] params) {
 
         if(!(sender instanceof Player)) {

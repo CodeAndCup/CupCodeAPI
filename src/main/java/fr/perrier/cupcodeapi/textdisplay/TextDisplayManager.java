@@ -13,9 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TextDisplayManager {
     private static TextDisplayManager instance;
-    private final Map<UUID, TextDisplayInstance> displays = new ConcurrentHashMap<>();
-    private final Map<Player, Set<UUID>> playerDisplays = new ConcurrentHashMap<>();
-    private BukkitTask hoverTask;
+    private static final Map<UUID, TextDisplayInstance> displays = new ConcurrentHashMap<>();
+    private static final Map<Player, Set<UUID>> playerDisplays = new ConcurrentHashMap<>();
+    private static BukkitTask hoverTask;
 
     private TextDisplayManager() {
         startHoverDetection();
@@ -134,7 +134,7 @@ public class TextDisplayManager {
     /**
      * Shutdown the manager, canceling tasks and removing all displays.
      */
-    public void shutdown() {
+    public static void shutdown() {
         if (hoverTask != null) {
             hoverTask.cancel();
         }

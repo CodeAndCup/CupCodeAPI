@@ -27,7 +27,7 @@ public class CupCodeAPI {
      * Disable the CupCodeAPI and clean up resources.
      */
     public static void disable() {
-        TextDisplayManager.getInstance().shutdown();
+        TextDisplayManager.shutdown();
     }
 
     /**

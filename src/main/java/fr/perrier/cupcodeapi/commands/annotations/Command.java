@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface Command {
     String[] names();
 
-    String permission() default "tavern.default";
+    String permission() default "";
 
     boolean async() default false;
 }

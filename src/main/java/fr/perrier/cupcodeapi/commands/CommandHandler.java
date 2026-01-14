@@ -197,6 +197,9 @@ public class CommandHandler implements Listener {
             this.handler = handler;
         }
 
+        /**
+         * Handle command execution by finding the appropriate sub-command
+         */
         @Override
         public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
             // Build the full command string including sub-commands
@@ -347,7 +350,11 @@ public class CommandHandler implements Listener {
     }
 
     /**
-     * Process a command (permission checks, argument validation, etc.)
+     * Evaluates and runs a command if found.
+     *
+     * @param sender  The sender of the command.
+     * @param command The full command string, without the leading slash.
+     * @return The CommandData that was executed, or null if no command matched.
      */
     public CommandData evalCommand(final CommandSender sender, String command) {
         String[] args = new String[]{};
@@ -442,36 +449,6 @@ public class CommandHandler implements Listener {
         registerParameterType(Player.class, new PlayerParameterType());
         registerParameterType(String.class, new StringParameterType());
     }
-
-    // Remove the event handlers since we're using direct registration now
-    // Keep them commented out in case you need fallback behavior
-    /*
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onCommandPreProcess(PlayerCommandPreprocessEvent event) {
-        String command = event.getMessage().substring(1);
-        CommandMap.parameters.put(event.getPlayer().getUniqueId(), command.split(" "));
-
-        if (evalCommand(event.getPlayer(), command) != null) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onConsoleCommand(ServerCommandEvent event) {
-        if (evalCommand(event.getSender(), event.getCommand()) != null) {
-            event.setCancelled(true);
-        }
-    }
-    */
-
-    // Erreur sous paper
-    /*@SneakyThrows
-    public static SimpleCommandMap getCommandMap() {
-        final Class<?> craftServerClass = Reflection.getOBCClass("CraftServer");
-        assert craftServerClass != null;
-        final Method getCommandMapMethod = craftServerClass.getMethod("getCommandMap");
-        return (SimpleCommandMap) getCommandMapMethod.invoke(craftServerClass.cast(Bukkit.getServer()), new Object[0]);
-    }*/
 
     @SneakyThrows
     public static SimpleCommandMap getCommandMap() {

@@ -152,10 +152,9 @@ public class ChatUtil {
             return message;
         }
 
-        // Opening tag with color and optional maxColors
-        // Content that doesn't contain gradient tags
+        // Updated regex pattern to better handle the gradient tags
         final Pattern gradientPattern = Pattern.compile(
-                "<gradient:(#?[A-Fa-f0-9]{6})(?::(\\\\d+))?>([^<]*(?:<(?!\\/?gradient:)[^<]*)*)<\\/gradient:(#?[A-Fa-f0-9]{6})>"
+                "<gradient:(#?[A-Fa-f0-9]{6})(?::(\\d+))?(?::([a-zA-Z,]+))?>([^<]*)<\\/gradient:(#?[A-Fa-f0-9]{6})>"
         );
 
         Matcher matcher = gradientPattern.matcher(message);
@@ -164,10 +163,28 @@ public class ChatUtil {
         while (matcher.find()) {
             String startColor = matcher.group(1).replace("#", "");
             String maxColorsStr = matcher.group(2);
-            String text = matcher.group(3);
-            String endColor = matcher.group(4).replace("#", "");
+            String formatsStr = matcher.group(3);
+            String text = matcher.group(4);
+            String endColor = matcher.group(5).replace("#", "");
 
-            if (startColor.equalsIgnoreCase(endColor)) continue;
+            if (startColor.equalsIgnoreCase(endColor)) {
+                StringBuilder formatCodes = new StringBuilder();
+                if (formatsStr != null) {
+                    String[] formats = formatsStr.toLowerCase().split(",");
+                    for (String f : formats) {
+                        switch (f.trim()) {
+                            case "bold": formatCodes.append("§l"); break;
+                            case "italic": formatCodes.append("§o"); break;
+                            case "underline": formatCodes.append("§n"); break;
+                            case "strike":
+                            case "strikethrough": formatCodes.append("§m"); break;
+                        }
+                    }
+                }
+                String sameColorText = translateHexColorCode(startColor) + formatCodes + text;
+                matcher.appendReplacement(buffer, Matcher.quoteReplacement(sameColorText));
+                continue;
+            }
 
             int maxColors = defaultMaxColors;
             if (maxColorsStr != null) {
@@ -178,11 +195,25 @@ public class ChatUtil {
                 }
             }
 
+            StringBuilder formatCodes = new StringBuilder();
+            if (formatsStr != null) {
+                String[] formats = formatsStr.toLowerCase().split(",");
+                for (String f : formats) {
+                    switch (f.trim()) {
+                        case "bold": formatCodes.append("§l"); break;
+                        case "italic": formatCodes.append("§o"); break;
+                        case "underline": formatCodes.append("§n"); break;
+                        case "strike":
+                        case "strikethrough": formatCodes.append("§m"); break;
+                    }
+                }
+            }
+
             try {
-                String gradientText = gradient(text, startColor, endColor, maxColors);
+                String gradientText = gradient(text, startColor, endColor, maxColors, formatCodes.toString());
                 matcher.appendReplacement(buffer, Matcher.quoteReplacement(gradientText));
             } catch (Exception e) {
-                String fallbackText = translateHexColorCode(startColor) + text;
+                String fallbackText = translateHexColorCode(startColor) + formatCodes + text;
                 matcher.appendReplacement(buffer, Matcher.quoteReplacement(fallbackText));
             }
         }
@@ -202,7 +233,7 @@ public class ChatUtil {
     /**
      * Modified gradient method to handle automatic maxColors when -1 is passed
      */
-    public static String gradient(String text, String startColor, String endColor, int maxColors) {
+    public static String gradient(String text, String startColor, String endColor, int maxColors, String formatCodes) {
         if (text == null || text.isEmpty()) {
             return "";
         }
@@ -210,7 +241,7 @@ public class ChatUtil {
         String cleanText = text.replaceAll("(?i)&[0-9A-FK-OR]", "").replaceAll("(?i)&#[0-9A-F]{6}", "");
 
         if (cleanText.length() <= 1) {
-            return translateHexColorCode(startColor) + cleanText;
+            return translateHexColorCode(startColor) + formatCodes + cleanText;
         }
 
         if (maxColors <= 0) {
@@ -227,17 +258,30 @@ public class ChatUtil {
         for (int i = 0; i < cleanText.length(); i++) {
             char character = cleanText.charAt(i);
 
-            int colorIndex = (i * (maxColors - 1)) / Math.max(1, cleanText.length() - 1);
+            double factor;
+            if (cleanText.length() == 1) {
+                factor = 0.0;
+            } else if (maxColors == 1) {
+                factor = 0.0;
+            } else {
+                double charPosition = (double) i / (cleanText.length() - 1);
+                int colorSlot = (int) Math.round(charPosition * (maxColors - 1));
+                factor = (double) colorSlot / (maxColors - 1);
+            }
 
-            double factor = (double) colorIndex / Math.max(1, maxColors - 1);
+            factor = Math.max(0.0, Math.min(1.0, factor));
 
-            int r = (int) (startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
-            int g = (int) (startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
-            int b = (int) (startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
+            int r = (int) Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
+            int g = (int) Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
+            int b = (int) Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
+
+            r = Math.max(0, Math.min(255, r));
+            g = Math.max(0, Math.min(255, g));
+            b = Math.max(0, Math.min(255, b));
 
             String hexColor = String.format("%02X%02X%02X", r, g, b);
 
-            gradientText.append(translateHexColorCode(hexColor)).append(character);
+            gradientText.append(translateHexColorCode(hexColor)).append(formatCodes).append(character);
         }
 
         return gradientText.toString();
