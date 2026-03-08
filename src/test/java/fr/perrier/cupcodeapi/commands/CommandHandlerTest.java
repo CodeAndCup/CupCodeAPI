@@ -50,6 +50,25 @@ public class CommandHandlerTest {
     @Test
     public void testParameterTabCompleteAfterFirstLetter() throws Exception {
         // Build CommandData manually (avoid calling registerCommands which interacts with Bukkit)
+        // Register a test ParameterType for String that returns suggestions
+        fr.perrier.cupcodeapi.commands.annotations.ParameterType<String> testStringType = new fr.perrier.cupcodeapi.commands.annotations.ParameterType<String>() {
+            @Override
+            public String transform(org.bukkit.command.CommandSender sender, String source) {
+                return source;
+            }
+
+            @Override
+            public java.util.List<String> tabComplete(org.bukkit.entity.Player sender, java.util.Set<String> flags, String source) {
+                java.util.List<String> all = java.util.Arrays.asList("pear", "peach", "apple");
+                java.util.List<String> out = new java.util.ArrayList<>();
+                for (String s : all) {
+                    if (source == null || source.isEmpty() || s.toLowerCase().startsWith(source.toLowerCase())) out.add(s);
+                }
+                return out;
+            }
+        };
+        CommandHandler.registerParameterType(String.class, testStringType);
+
         Method method = FakeCommands.class.getMethod("testCommand", Player.class, String.class);
         fr.perrier.cupcodeapi.commands.annotations.Command cmdAnn = method.getAnnotation(fr.perrier.cupcodeapi.commands.annotations.Command.class);
         java.lang.annotation.Annotation[] paramAnnos = method.getParameterAnnotations()[1];
@@ -67,6 +86,13 @@ public class CommandHandlerTest {
 
         CommandData cmdData = new CommandData(cmdAnn, params, method, method.getParameterTypes()[0].isAssignableFrom(Player.class));
         CommandHandler.commands.add(cmdData);
+
+        // Also add to handler.registeredRootCommands via reflection so onTabComplete can find it
+        java.lang.reflect.Field rrField = CommandHandler.class.getDeclaredField("registeredRootCommands");
+        rrField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, java.util.List<CommandData>> rrMap = (java.util.Map<String, java.util.List<CommandData>>) rrField.get(handler);
+        rrMap.computeIfAbsent("root", k -> new java.util.ArrayList<>()).add(cmdData);
 
         // Create a MultiCommandExecutor for the root via reflection
         Class<?> execClass = Class.forName("fr.perrier.cupcodeapi.commands.CommandHandler$MultiCommandExecutor");
@@ -103,5 +129,8 @@ public class CommandHandlerTest {
         List<String> completions = (List<String>) onTabComplete.invoke(exec, sender, mock(Command.class), alias, args);
 
         assertNotNull(completions);
+        // Ensure we got suggestions from the test ParameterType
+        assertFalse(completions.isEmpty(), "Expected completions to be non-empty");
+        assertTrue(completions.stream().anyMatch(s -> s.equalsIgnoreCase("pear") || s.equalsIgnoreCase("peach")), "Expected pear or peach in completions");
     }
 }

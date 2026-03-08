@@ -308,10 +308,17 @@ public class CommandHandler implements Listener {
                     ParameterData paramData = exactMatch.getParameters().get(parameterIndex - 1);
                     String currentParam = args.length > 0 ? args[args.length - 1] : "";
 
-                    return tabCompleteParameter(player, currentParam,
+                    List<String> paramCompletions = tabCompleteParameter(player, currentParam,
                             paramData.getParameterClass(), paramData.getTabCompleteFlags());
+
+                    // If the parameter completer returns values, return them.
+                    if (paramCompletions != null && !paramCompletions.isEmpty()) {
+                        return paramCompletions;
+                    }
+                    // Otherwise, fallthrough to sub-command completion below as a fallback
+                } else {
+                    return completions; // No more parameters to complete
                 }
-                return completions; // No more parameters to complete
             }
 
             // Otherwise, complete sub-commands
