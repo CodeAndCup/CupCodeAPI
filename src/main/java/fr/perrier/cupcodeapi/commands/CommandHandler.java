@@ -276,6 +276,9 @@ public class CommandHandler implements Listener {
                     String[] cmdParts = cmdLower.split(" ");
                     boolean isMatch = true;
 
+                    // Detect if the user typed a trailing space (e.g. args = [""])
+                    boolean trailingEmpty = (args.length > 0 && args[args.length - 1].trim().isEmpty());
+
                     // Il faut au moins (cmdParts.length - 1) args pour avoir tapé
                     // toutes les sous-commandes de cette commande.
                     if (args.length < cmdParts.length - 1) {
@@ -283,11 +286,18 @@ public class CommandHandler implements Listener {
                     } else {
                         for (int i = 1; i < cmdParts.length; i++) {
                             // args indices démarrent à 0 pour la première partie après le root
-                            if (!cmdParts[i].equals(args[i - 1].toLowerCase())) {
+                            String argVal = args[i - 1];
+                            if (argVal == null || argVal.trim().isEmpty() || !cmdParts[i].equals(argVal.toLowerCase())) {
                                 isMatch = false;
                                 break;
                             }
                         }
+                    }
+
+                    // If user just typed a trailing space after the root (they typed '/root ')
+                    // we should NOT match a root-only command as an exactMatch (so we can suggest sub-commands)
+                    if (trailingEmpty && cmdParts.length == 1) {
+                        isMatch = false;
                     }
 
                     if (isMatch) {
