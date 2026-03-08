@@ -221,7 +221,7 @@ public class CommandHandler implements Listener {
                             for (String cmdName : cmd.getNames()) {
                                 if (cmdName.toLowerCase().startsWith(rootCommand.toLowerCase())) {
                                     String usage = "/" + cmdName;
-                                    if (cmd.getParameters().size() > 0) {
+                                    if (!cmd.getParameters().isEmpty()) {
                                         usage += " " + getParameterUsage(cmd);
                                     }
                                     sender.sendMessage(ChatColor.GRAY + "- " + usage);
@@ -267,7 +267,30 @@ public class CommandHandler implements Listener {
 
                 for (String cmdName : cmd.getNames()) {
                     String cmdLower = cmdName.toLowerCase();
-                    if (cmdLower.equals(currentPartialCommand.trim())) {
+
+                    // Nouvelle logique : on compare les parties (words) de la commande
+                    // avec les args déjà tapés. Ainsi, si l'utilisateur a tapé le
+                    // sous-commande complète puis commence à taper le premier
+                    // paramètre, on reconnaîtra quand même un "exact match" pour
+                    // compléter les paramètres.
+                    String[] cmdParts = cmdLower.split(" ");
+                    boolean isMatch = true;
+
+                    // Il faut au moins (cmdParts.length - 1) args pour avoir tapé
+                    // toutes les sous-commandes de cette commande.
+                    if (args.length < cmdParts.length - 1) {
+                        isMatch = false;
+                    } else {
+                        for (int i = 1; i < cmdParts.length; i++) {
+                            // args indices démarrent à 0 pour la première partie après le root
+                            if (!cmdParts[i].equals(args[i - 1].toLowerCase())) {
+                                isMatch = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isMatch) {
                         exactMatch = cmd;
                         exactCommandName = cmdName;
                         break;
@@ -458,3 +481,4 @@ public class CommandHandler implements Listener {
         return (SimpleCommandMap) commandMapField.get(server);
     }
 }
+

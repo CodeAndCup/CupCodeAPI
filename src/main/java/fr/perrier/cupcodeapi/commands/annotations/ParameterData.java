@@ -21,24 +21,4 @@ public class ParameterData {
         this.tabCompleteFlags = paramAnnotation.tabCompleteFlags();
         this.parameterClass = parameterClass;
     }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Class<?> getParameterClass() {
-        return parameterClass;
-    }
-
-    public boolean isWildcard() {
-        return wildcard;
-    }
-
-    public String[] getTabCompleteFlags() {
-        return tabCompleteFlags;
-    }
 }
