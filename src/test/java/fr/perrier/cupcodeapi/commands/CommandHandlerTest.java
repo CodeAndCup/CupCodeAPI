@@ -143,14 +143,24 @@ public class CommandHandlerTest {
         }
         assertNotNull(exec);
 
+        // Get the onTabComplete method reference via reflection
+        Method onTabComplete = execClass.getMethod("onTabComplete", CommandSender.class, Command.class, String.class, String[].class);
+
         Player sender = mock(Player.class);
         when(sender.getName()).thenReturn("tester");
         when(sender.canSee(any())).thenReturn(true);
 
-        // First: simulate typing `/root ` then pressing tab (empty partial) -> should suggest the sub-command 'sub'
+        // First: simulate typing `/root s` then pressing tab (partial 's') -> should suggest the sub-command 'sub'
         String alias = "root";
+        String[] argsPartial = new String[]{"s"};
+        @SuppressWarnings("unchecked")
+        List<String> completionsPartial = (List<String>) onTabComplete.invoke(exec, sender, mock(Command.class), alias, argsPartial);
+        System.out.println("DEBUG completionsPartial=" + completionsPartial);
+        assertNotNull(completionsPartial);
+        assertTrue(completionsPartial.stream().anyMatch(s -> s.equalsIgnoreCase("sub")), "Expected 'sub' in completions when typing '/root s'");
+
+        // Then: simulate typing `/root ` then pressing tab (empty partial) -> should suggest the sub-command 'sub'
         String[] argsEmptyPartial = new String[]{""};
-        Method onTabComplete = execClass.getMethod("onTabComplete", CommandSender.class, Command.class, String.class, String[].class);
         @SuppressWarnings("unchecked")
         List<String> completionsForSub = (List<String>) onTabComplete.invoke(exec, sender, mock(Command.class), alias, argsEmptyPartial);
         System.out.println("DEBUG completionsForSub=" + completionsForSub);

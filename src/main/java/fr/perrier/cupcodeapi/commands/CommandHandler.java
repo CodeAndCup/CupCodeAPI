@@ -258,6 +258,44 @@ public class CommandHandler implements Listener {
                 currentPartialCommand += " " + String.join(" ", args).toLowerCase();
             }
 
+            // Early sub-command completion: if the user is typing the next word (partial),
+            // prefer suggesting sub-commands first (e.g. '/root s' -> 'sub').
+            String earlyPartialLastWord = args.length > 0 ? args[args.length - 1].toLowerCase() : "";
+            String earlyCommandSoFar = alias.toLowerCase();
+            if (args.length > 1) {
+                earlyCommandSoFar += " " + String.join(" ", Arrays.copyOf(args, args.length - 1)).toLowerCase();
+            }
+
+            List<String> earlySubCompletions = new ArrayList<>();
+            // DEBUG
+            System.out.println("DBG onTabComplete earlyPartialLastWord=" + earlyPartialLastWord + " earlyCommandSoFar=" + earlyCommandSoFar + " available=" + availableCommands.stream().map(c -> java.util.Arrays.toString(c.getNames())).reduce((a,b)->a+","+b).orElse("[]"));
+             for (CommandData cmd : availableCommands) {
+                 if (!cmd.canAccess(sender)) continue;
+
+                 for (String cmdName : cmd.getNames()) {
+                     String cmdLower = cmdName.toLowerCase();
+
+                     if (cmdLower.startsWith(earlyCommandSoFar)) {
+                        System.out.println("DBG check cmdLower='" + cmdLower + "' startsWith('" + earlyCommandSoFar + "')=true");
+                         String remaining = cmdLower.substring(earlyCommandSoFar.length());
+                         System.out.println("DBG remaining raw='" + remaining + "'");
+                         if (remaining.startsWith(" ")) remaining = remaining.substring(1);
+                         System.out.println("DBG remaining after trim='" + remaining + "'");
+                         if (!remaining.isEmpty()) {
+                             String nextWord = remaining.split(" ")[0];
+                             System.out.println("DBG nextWord='" + nextWord + "' earlyPartialLastWord='" + earlyPartialLastWord + "'");
+                             if (earlyPartialLastWord.isEmpty() || nextWord.startsWith(earlyPartialLastWord)) {
+                                 if (!earlySubCompletions.contains(nextWord)) earlySubCompletions.add(nextWord);
+                             }
+                         }
+                      }
+                 }
+             }
+
+            if (!earlySubCompletions.isEmpty()) {
+                return earlySubCompletions;
+            }
+
             // Check if we have an exact command match first
             CommandData exactMatch = null;
             String exactCommandName = null;
@@ -285,9 +323,17 @@ public class CommandHandler implements Listener {
                         isMatch = false;
                     } else {
                         for (int i = 1; i < cmdParts.length; i++) {
-                            // args indices démarrent à 0 pour la première partie après le root
+                            String part = cmdParts[i];
+                            if (i == cmdParts.length - 1 && trailingEmpty) {
+                                // Si c'est le dernier "part" et qu'on a un arg vide à la fin,
+                                // c'est probablement à cause d'un espace après la commande.
+                                // On considère ça comme un "match" même s'il reste des parties
+                                // à compléter.
+                                continue;
+                            }
+
                             String argVal = args[i - 1];
-                            if (argVal == null || argVal.trim().isEmpty() || !cmdParts[i].equals(argVal.toLowerCase())) {
+                            if (argVal == null || argVal.trim().isEmpty() || !part.equals(argVal.toLowerCase())) {
                                 isMatch = false;
                                 break;
                             }
@@ -297,6 +343,11 @@ public class CommandHandler implements Listener {
                     // If user just typed a trailing space after the root (they typed '/root ')
                     // we should NOT match a root-only command as an exactMatch (so we can suggest sub-commands)
                     if (trailingEmpty && cmdParts.length == 1) {
+                        isMatch = false;
+                    }
+
+                    // If there are args present (user typed something after root), do not match a root-only command as exact
+                    if (cmdParts.length == 1 && args.length > 0 && !trailingEmpty) {
                         isMatch = false;
                     }
 
@@ -353,14 +404,14 @@ public class CommandHandler implements Listener {
                         }
 
                         if (!remaining.isEmpty()) {
-                            String nextWord = remaining.split(" ")[0];
+                          String nextWord = remaining.split(" ")[0];
 
-                            // If we're typing a partial word, check if it matches
-                            if (partialLastWord.isEmpty() || nextWord.startsWith(partialLastWord)) {
-                                if (!completions.contains(nextWord)) {
-                                    completions.add(nextWord);
-                                }
+                          // If we're typing a partial word, check if it matches
+                          if (partialLastWord.isEmpty() || nextWord.startsWith(partialLastWord)) {
+                            if (!completions.contains(nextWord)) {
+                              completions.add(nextWord);
                             }
+                          }
                         }
                     }
                 }
